@@ -3,9 +3,10 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, PlayCircle, Download, CheckCircle2, Lock } from "lucide-react";
+import { ArrowLeft, Download, CheckCircle2, Lock } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 export function ModuleShow() {
   return (
@@ -17,11 +18,11 @@ export function ModuleShow() {
 
 function ModuleShowContent() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: module, isLoading, isError } = useGetModule(slug || "", { 
-    query: { 
+  const { data: module, isLoading, isError } = useGetModule(slug || "", {
+    query: {
       enabled: !!slug,
-      queryKey: getGetModuleQueryKey(slug || "")
-    } 
+      queryKey: getGetModuleQueryKey(slug || ""),
+    },
   });
   const { toast } = useToast();
 
@@ -72,6 +73,12 @@ function ModuleShowContent() {
     );
   }
 
+  const videoUrl = module.videoEmbedUrl;
+  const isRealVideo =
+    typeof videoUrl === "string" &&
+    videoUrl.length > 0 &&
+    !videoUrl.startsWith("stub:");
+
   return (
     <div className="flex-1 bg-background pb-20">
       {/* Header Bar */}
@@ -92,24 +99,25 @@ function ModuleShowContent() {
       </div>
 
       <div className="container mx-auto px-4 max-w-4xl py-12">
-        {/* Video Embed Placeholder */}
-        {module.videoEmbedUrl !== undefined && (
-          <div className="mb-12 rounded-2xl overflow-hidden shadow-lg border border-border bg-black aspect-video relative flex items-center justify-center group cursor-pointer">
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
-            <img src="/clinician-exercise.png" alt="Video thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-60" />
-            <div className="relative z-20 text-center">
-              <PlayCircle className="w-20 h-20 text-white mx-auto mb-4 opacity-90 group-hover:scale-110 transition-transform" />
-              <p className="text-white font-bold text-lg bg-black/60 px-4 py-2 rounded-full inline-block backdrop-blur-sm">
-                Video Coming Soon
-              </p>
-            </div>
+        {/* Video Embed */}
+        {isRealVideo && (
+          <div className="mb-12 rounded-2xl overflow-hidden shadow-lg border border-border bg-black aspect-video relative">
+            <iframe
+              src={videoUrl!}
+              title={`${module.title} — video lesson`}
+              className="absolute inset-0 w-full h-full"
+              frameBorder={0}
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
           </div>
         )}
 
         {/* Content Body */}
-        <div className="prose prose-lg md:prose-xl prose-headings:font-serif prose-headings:text-primary max-w-none mb-16 prose-p:leading-relaxed">
-          {/* Note: In a real app we'd use react-markdown. Assuming module.body has simple html/text for MVP */}
-          <div dangerouslySetInnerHTML={{ __html: module.body || "<p>Content goes here.</p>" }} />
+        <div className="prose prose-lg md:prose-xl prose-headings:font-serif prose-headings:text-primary max-w-none mb-16 prose-p:leading-relaxed prose-li:text-lg prose-li:leading-relaxed prose-strong:text-foreground">
+          <ReactMarkdown>
+            {module.body || "Content coming soon."}
+          </ReactMarkdown>
         </div>
 
         {/* Key Points */}
@@ -132,15 +140,54 @@ function ModuleShowContent() {
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-t border-border pt-8 mt-12">
           {module.printable && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full sm:w-auto min-h-[56px] px-6 text-lg rounded-full"
-              onClick={() => toast({ title: "Generating PDF...", description: "Your download will begin shortly." })}
+              onClick={() => {
+                toast({
+                  title: "Preparing your handout",
+                  description: "Opening a print-ready view in a new tab.",
+                });
+                const w = window.open("", "_blank");
+                if (!w) return;
+                const safeTitle = module.title.replace(/[<>&]/g, "");
+                const bodyHtml = (module.body || "")
+                  .split("\n\n")
+                  .map((para) => {
+                    const trimmed = para.trim();
+                    if (trimmed.startsWith("### ")) return `<h3>${trimmed.slice(4)}</h3>`;
+                    if (trimmed.startsWith("## ")) return `<h2>${trimmed.slice(3)}</h2>`;
+                    if (trimmed.startsWith("# ")) return `<h1>${trimmed.slice(2)}</h1>`;
+                    return `<p>${trimmed.replace(/\n/g, "<br/>")}</p>`;
+                  })
+                  .join("\n");
+                const takeaways = (module.keyPoints || [])
+                  .map((p) => `<li>${p}</li>`)
+                  .join("");
+                w.document.write(`<!doctype html><html><head><meta charset="utf-8"/><title>${safeTitle} — Handout</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 720px; margin: 40px auto; padding: 0 24px; color: #222; line-height: 1.6; }
+  h1 { font-size: 28px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+  h2 { font-size: 22px; margin-top: 32px; }
+  h3 { font-size: 18px; margin-top: 24px; }
+  .takeaways { background: #f5f0e8; border-left: 4px solid #8a6d3b; padding: 16px 20px; margin: 24px 0; }
+  .takeaways h3 { margin-top: 0; }
+  @media print { body { margin: 0; } button { display: none; } }
+</style></head><body>
+<h1>${safeTitle}</h1>
+<p><em>${module.subtitle || ""}</em></p>
+${bodyHtml}
+${takeaways ? `<div class="takeaways"><h3>Key Takeaways</h3><ul>${takeaways}</ul></div>` : ""}
+<p style="margin-top:40px;text-align:center;color:#888;font-size:12px;">Fall Prevention Plan — printable handout</p>
+<script>window.onload=function(){setTimeout(function(){window.print();},300);};</script>
+</body></html>`);
+                w.document.close();
+              }}
             >
               <Download className="w-5 h-5 mr-2" /> Download Printable Guide
             </Button>
           )}
-          
+
           <Button className="w-full sm:w-auto min-h-[56px] px-8 text-lg rounded-full font-bold ml-auto">
             Mark as Complete <CheckCircle2 className="w-5 h-5 ml-2" />
           </Button>
