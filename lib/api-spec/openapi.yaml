@@ -3,20 +3,35 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Fall Prevention Plan API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: me
+    description: Current user
+  - name: assessment
+    description: Fall Risk Self-Assessment
+  - name: modules
+    description: Course modules
+  - name: sessions
+    description: Live sessions
+  - name: library
+    description: Recorded library items
+  - name: billing
+    description: Mock billing & checkout
+  - name: concierge
+    description: Concierge dashboard
+  - name: admin
+    description: Admin views
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +39,217 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [me]
+      summary: Get the current user profile and tier
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+
+  /assessment/questions:
+    get:
+      operationId: getAssessmentQuestions
+      tags: [assessment]
+      summary: Public list of Fall Risk Self-Assessment questions
+      responses:
+        "200":
+          description: Question set
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssessmentQuestion"
+
+  /assessment/submit:
+    post:
+      operationId: submitAssessment
+      tags: [assessment]
+      summary: Submit answers and get a scored fall-risk profile (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentInput"
+      responses:
+        "200":
+          description: Scored result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentResult"
+
+  /assessment/me:
+    get:
+      operationId: getMyAssessment
+      tags: [assessment]
+      summary: Get the signed-in user's most recent assessment, if any
+      responses:
+        "200":
+          description: Latest result (or null)
+          content:
+            application/json:
+              schema:
+                type: ["object", "null"]
+                $ref: "#/components/schemas/AssessmentResult"
+
+  /modules:
+    get:
+      operationId: listModules
+      tags: [modules]
+      summary: List all course modules with lock status for current user
+      responses:
+        "200":
+          description: Modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ModuleSummary"
+
+  /modules/{slug}:
+    get:
+      operationId: getModule
+      tags: [modules]
+      summary: Get a single module (full body if unlocked)
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Module
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Module"
+
+  /sessions/upcoming:
+    get:
+      operationId: listUpcomingSessions
+      tags: [sessions]
+      summary: List upcoming live group classes and Q&A sessions
+      responses:
+        "200":
+          description: Upcoming sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LiveSession"
+
+  /library:
+    get:
+      operationId: listLibraryItems
+      tags: [library]
+      summary: List recorded classes, past Q&A, articles, and interviews
+      responses:
+        "200":
+          description: Library items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LibraryItem"
+
+  /billing/summary:
+    get:
+      operationId: getBillingSummary
+      tags: [billing]
+      summary: Current tier, mock next charge date, and recent invoices
+      responses:
+        "200":
+          description: Billing summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingSummary"
+
+  /billing/checkout:
+    post:
+      operationId: mockCheckout
+      tags: [billing]
+      summary: Mocked Stripe checkout — flips the signed-in user's tier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: Updated billing summary after mock purchase
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingSummary"
+
+  /billing/cancel:
+    post:
+      operationId: cancelSubscription
+      tags: [billing]
+      summary: Mock-cancel the user's subscription (returns them to free tier)
+      responses:
+        "200":
+          description: Updated billing summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingSummary"
+
+  /concierge/me:
+    get:
+      operationId: getMyConciergeDashboard
+      tags: [concierge]
+      summary: Concierge dashboard for the signed-in concierge member
+      responses:
+        "200":
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConciergeDashboard"
+
+  /admin/members:
+    get:
+      operationId: listAdminMembers
+      tags: [admin]
+      summary: Read-only admin list of members
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminMember"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Headline admin metrics (totals by tier, MRR, assessments completed)
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +260,215 @@ components:
       required:
         - status
 
+    Tier:
+      type: string
+      enum: [guest, one_time, subscription, concierge, admin]
+      description: Access tier for the current user
+
+    Me:
+      type: object
+      required: [signedIn, tier]
+      properties:
+        signedIn: { type: boolean }
+        tier: { $ref: "#/components/schemas/Tier" }
+        email: { type: ["string", "null"] }
+        name: { type: ["string", "null"] }
+        joinedAt: { type: ["string", "null"], format: date-time }
+
+    AssessmentQuestion:
+      type: object
+      required: [id, prompt, options]
+      properties:
+        id: { type: string }
+        category: { type: string, description: "STEADI category, e.g. history, mobility, vision, meds, home" }
+        prompt: { type: string }
+        helpText: { type: ["string", "null"] }
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssessmentOption"
+
+    AssessmentOption:
+      type: object
+      required: [value, label, score]
+      properties:
+        value: { type: string }
+        label: { type: string }
+        score: { type: integer, description: "Points contributed to risk score when selected" }
+
+    AssessmentInput:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            required: [questionId, value]
+            properties:
+              questionId: { type: string }
+              value: { type: string }
+        name: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+
+    AssessmentResult:
+      type: object
+      required: [score, level, headline, recommendations, completedAt]
+      properties:
+        score: { type: integer }
+        level:
+          type: string
+          enum: [low, moderate, high]
+        headline: { type: string }
+        summary: { type: string }
+        recommendations:
+          type: array
+          items: { type: string }
+        completedAt: { type: string, format: date-time }
+
+    PlanSection:
+      type: string
+      enum: [intro, ten_point, five_point, appendix_a, appendix_b]
+
+    ModuleSummary:
+      type: object
+      required: [slug, title, order, planSection, locked]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        order: { type: integer }
+        planSection: { $ref: "#/components/schemas/PlanSection" }
+        durationMin: { type: ["integer", "null"] }
+        locked: { type: boolean }
+        comingSoon: { type: boolean }
+
+    Module:
+      type: object
+      required: [slug, title, order, planSection, locked, comingSoon]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        order: { type: integer }
+        planSection: { $ref: "#/components/schemas/PlanSection" }
+        durationMin: { type: ["integer", "null"] }
+        locked: { type: boolean }
+        comingSoon: { type: boolean }
+        videoEmbedUrl: { type: ["string", "null"] }
+        body: { type: ["string", "null"], description: "Markdown body, only present when not locked" }
+        keyPoints:
+          type: array
+          items: { type: string }
+        printable: { type: boolean }
+
+    LiveSession:
+      type: object
+      required: [id, kind, title, startsAt, durationMin, host]
+      properties:
+        id: { type: integer }
+        kind:
+          type: string
+          enum: [class, qa, one_on_one]
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        startsAt: { type: string, format: date-time }
+        durationMin: { type: integer }
+        host: { type: string }
+        joinUrl: { type: ["string", "null"], description: "Mocked join URL (stub)" }
+
+    LibraryItem:
+      type: object
+      required: [id, title, kind, publishedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        kind:
+          type: string
+          enum: [recording, article, interview]
+        summary: { type: ["string", "null"] }
+        publishedAt: { type: string, format: date-time }
+        durationMin: { type: ["integer", "null"] }
+
+    Invoice:
+      type: object
+      required: [id, description, amountCents, paidAt]
+      properties:
+        id: { type: string }
+        description: { type: string }
+        amountCents: { type: integer }
+        paidAt: { type: string, format: date-time }
+
+    BillingSummary:
+      type: object
+      required: [tier, invoices]
+      properties:
+        tier: { $ref: "#/components/schemas/Tier" }
+        priceLabel: { type: ["string", "null"] }
+        nextChargeAt: { type: ["string", "null"], format: date-time }
+        invoices:
+          type: array
+          items: { $ref: "#/components/schemas/Invoice" }
+
+    CheckoutInput:
+      type: object
+      required: [plan]
+      properties:
+        plan:
+          type: string
+          enum: [one_time, subscription, concierge]
+
+    ConciergeCheckIn:
+      type: object
+      required: [id, message, fromName, createdAt]
+      properties:
+        id: { type: integer }
+        message: { type: string }
+        fromName: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ConciergeNote:
+      type: object
+      required: [id, body, createdAt, authorName]
+      properties:
+        id: { type: integer }
+        body: { type: string }
+        authorName: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ConciergeDashboard:
+      type: object
+      required: [memberName, nextOutreachAt, latestCheckIn, notes]
+      properties:
+        memberName: { type: string }
+        nextOutreachAt: { type: string, format: date-time }
+        latestCheckIn: { $ref: "#/components/schemas/ConciergeCheckIn" }
+        notes:
+          type: array
+          items: { $ref: "#/components/schemas/ConciergeNote" }
+
+    AdminMember:
+      type: object
+      required: [id, name, email, tier, signupDate, lastLogin]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        tier: { $ref: "#/components/schemas/Tier" }
+        signupDate: { type: string, format: date-time }
+        lastLogin: { type: string, format: date-time }
+        assessmentScore: { type: ["integer", "null"] }
+        riskLevel:
+          type: ["string", "null"]
+          enum: [low, moderate, high, null]
+
+    AdminStats:
+      type: object
+      required: [totalMembers, subscriptionMembers, conciergeMembers, oneTimeMembers, assessmentsCompleted, mrrCents]
+      properties:
+        totalMembers: { type: integer }
+        subscriptionMembers: { type: integer }
+        conciergeMembers: { type: integer }
+        oneTimeMembers: { type: integer }
+        assessmentsCompleted: { type: integer }
+        mrrCents: { type: integer }

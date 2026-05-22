@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Fall Prevention Plan"
+version = "1.0.0"
+id = "artifacts/fall-prevention"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19269
+
+[services.development]
+run = "pnpm --filter @workspace/fall-prevention run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/fall-prevention", "run", "build" ]
+publicDir = "artifacts/fall-prevention/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19269"
+BASE_PATH = "/"

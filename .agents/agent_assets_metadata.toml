@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "FAlzvNkzLwJQZf91VGl3t"
+uri = "file://attached_assets/generated_images/hero-seniors.png"
+type = "image"
+title = "Seniors walking confidently"
+
+[[generated]]
+id = "YfNdMNOwg3JrSQMcYAG2Z"
+uri = "file://attached_assets/generated_images/clinician-exercise.png"
+type = "image"
+title = "Clinician demonstrating exercise"
