@@ -29,6 +29,16 @@ import {
   GetMyConciergeDashboardResponse,
   ListAdminMembersResponse,
   GetAdminStatsResponse,
+  ListAdminModulesResponse,
+  GetAdminModuleResponse,
+  GetAdminModuleParams,
+  CreateAdminModuleBody,
+  CreateAdminModuleResponse,
+  UpdateAdminModuleBody,
+  UpdateAdminModuleParams,
+  UpdateAdminModuleResponse,
+  DeleteAdminModuleParams,
+  DeleteAdminModuleResponse,
 } from "@workspace/api-zod";
 import { getCurrentUser, type Tier } from "../lib/currentUser";
 import { assessmentQuestions, scoreAssessment } from "../lib/questions";
@@ -425,6 +435,166 @@ router.get("/admin/stats", async (req, res): Promise<void> => {
       mrrCents: mrr,
     }),
   );
+});
+
+// ---------- Admin: Course (module) management ----------
+
+async function requireAdmin(req: Request, res: Response): Promise<boolean> {
+  const me = await getCurrentUser(req);
+  if (me.tier !== "admin") {
+    res.status(403).json({ error: "Admin access required." });
+    return false;
+  }
+  return true;
+}
+
+function toAdminModule(row: typeof modulesTable.$inferSelect) {
+  return {
+    slug: row.slug,
+    title: row.title,
+    subtitle: row.subtitle,
+    order: row.order,
+    planSection: row.planSection as
+      | "intro"
+      | "ten_point"
+      | "five_point"
+      | "appendix_a"
+      | "appendix_b",
+    durationMin: row.durationMin,
+    videoEmbedUrl: row.videoEmbedUrl,
+    body: row.body,
+    keyPoints: row.keyPoints ?? [],
+    comingSoon: row.comingSoon,
+    freeTier: row.freeTier,
+    printable: row.printable,
+  };
+}
+
+router.get("/admin/modules", async (req, res): Promise<void> => {
+  if (!(await requireAdmin(req, res))) return;
+  const rows = await db.select().from(modulesTable).orderBy(asc(modulesTable.order));
+  res.json(ListAdminModulesResponse.parse(rows.map(toAdminModule)));
+});
+
+router.get("/admin/modules/:slug", async (req, res): Promise<void> => {
+  if (!(await requireAdmin(req, res))) return;
+  const params = GetAdminModuleParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+  const [row] = await db
+    .select()
+    .from(modulesTable)
+    .where(eq(modulesTable.slug, params.data.slug));
+  if (!row) {
+    res.status(404).json({ error: "Module not found" });
+    return;
+  }
+  res.json(GetAdminModuleResponse.parse(toAdminModule(row)));
+});
+
+router.post("/admin/modules", async (req, res): Promise<void> => {
+  if (!(await requireAdmin(req, res))) return;
+  const body = CreateAdminModuleBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+  const existing = await db
+    .select({ id: modulesTable.id })
+    .from(modulesTable)
+    .where(eq(modulesTable.slug, body.data.slug));
+  if (existing.length > 0) {
+    res.status(409).json({ error: "A module with that slug already exists." });
+    return;
+  }
+  const [created] = await db
+    .insert(modulesTable)
+    .values({
+      slug: body.data.slug,
+      title: body.data.title,
+      subtitle: body.data.subtitle ?? null,
+      order: body.data.order,
+      planSection: body.data.planSection,
+      durationMin: body.data.durationMin ?? null,
+      videoEmbedUrl: body.data.videoEmbedUrl ?? null,
+      body: body.data.body ?? null,
+      keyPoints: body.data.keyPoints ?? [],
+      comingSoon: body.data.comingSoon ?? false,
+      freeTier: body.data.freeTier ?? false,
+      printable: body.data.printable ?? false,
+    })
+    .returning();
+  res.json(CreateAdminModuleResponse.parse(toAdminModule(created)));
+});
+
+router.put("/admin/modules/:slug", async (req, res): Promise<void> => {
+  if (!(await requireAdmin(req, res))) return;
+  const params = UpdateAdminModuleParams.safeParse(req.params);
+  const body = UpdateAdminModuleBody.safeParse(req.body);
+  if (!params.success || !body.success) {
+    res.status(400).json({
+      error: !params.success ? params.error.message : body.error!.message,
+    });
+    return;
+  }
+  const [existing] = await db
+    .select()
+    .from(modulesTable)
+    .where(eq(modulesTable.slug, params.data.slug));
+  if (!existing) {
+    res.status(404).json({ error: "Module not found" });
+    return;
+  }
+  // If slug is being changed, ensure new slug is unique.
+  if (body.data.slug !== params.data.slug) {
+    const conflict = await db
+      .select({ id: modulesTable.id })
+      .from(modulesTable)
+      .where(eq(modulesTable.slug, body.data.slug));
+    if (conflict.length > 0) {
+      res.status(409).json({ error: "Another module already uses that slug." });
+      return;
+    }
+  }
+  const [updated] = await db
+    .update(modulesTable)
+    .set({
+      slug: body.data.slug,
+      title: body.data.title,
+      subtitle: body.data.subtitle ?? null,
+      order: body.data.order,
+      planSection: body.data.planSection,
+      durationMin: body.data.durationMin ?? null,
+      videoEmbedUrl: body.data.videoEmbedUrl ?? null,
+      body: body.data.body ?? null,
+      keyPoints: body.data.keyPoints ?? [],
+      comingSoon: body.data.comingSoon ?? false,
+      freeTier: body.data.freeTier ?? false,
+      printable: body.data.printable ?? false,
+    })
+    .where(eq(modulesTable.id, existing.id))
+    .returning();
+  res.json(UpdateAdminModuleResponse.parse(toAdminModule(updated)));
+});
+
+router.delete("/admin/modules/:slug", async (req, res): Promise<void> => {
+  if (!(await requireAdmin(req, res))) return;
+  const params = DeleteAdminModuleParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+  const result = await db
+    .delete(modulesTable)
+    .where(eq(modulesTable.slug, params.data.slug))
+    .returning({ id: modulesTable.id });
+  if (result.length === 0) {
+    res.status(404).json({ error: "Module not found" });
+    return;
+  }
+  res.json(DeleteAdminModuleResponse.parse({ ok: true }));
 });
 
 export default router;

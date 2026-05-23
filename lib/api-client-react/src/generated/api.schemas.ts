@@ -248,6 +248,44 @@ export interface AdminMember {
   riskLevel?: AdminMemberRiskLevel;
 }
 
+export interface AdminModule {
+  slug: string;
+  title: string;
+  /** @nullable */
+  subtitle?: string | null;
+  order: number;
+  planSection: PlanSection;
+  /** @nullable */
+  durationMin?: number | null;
+  /** @nullable */
+  videoEmbedUrl?: string | null;
+  /** @nullable */
+  body?: string | null;
+  keyPoints: string[];
+  comingSoon: boolean;
+  freeTier: boolean;
+  printable: boolean;
+}
+
+export interface AdminModuleInput {
+  slug: string;
+  title: string;
+  /** @nullable */
+  subtitle?: string | null;
+  order: number;
+  planSection: PlanSection;
+  /** @nullable */
+  durationMin?: number | null;
+  /** @nullable */
+  videoEmbedUrl?: string | null;
+  /** @nullable */
+  body?: string | null;
+  keyPoints?: string[];
+  comingSoon?: boolean;
+  freeTier?: boolean;
+  printable?: boolean;
+}
+
 export interface AdminStats {
   totalMembers: number;
   subscriptionMembers: number;
@@ -256,4 +294,8 @@ export interface AdminStats {
   assessmentsCompleted: number;
   mrrCents: number;
 }
+
+export type DeleteAdminModule200 = {
+  ok: boolean;
+};
 

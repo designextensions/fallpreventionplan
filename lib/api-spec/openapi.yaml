@@ -250,6 +250,97 @@ paths:
               schema:
                 $ref: "#/components/schemas/AdminStats"
 
+  /admin/modules:
+    get:
+      operationId: listAdminModules
+      tags: [admin]
+      summary: List every module with full editable fields (admin only)
+      responses:
+        "200":
+          description: Modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminModule"
+    post:
+      operationId: createAdminModule
+      tags: [admin]
+      summary: Create a new module
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminModuleInput"
+      responses:
+        "200":
+          description: Created module
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminModule"
+
+  /admin/modules/{slug}:
+    get:
+      operationId: getAdminModule
+      tags: [admin]
+      summary: Get a single module with full editable fields
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Module
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminModule"
+    put:
+      operationId: updateAdminModule
+      tags: [admin]
+      summary: Update an existing module
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminModuleInput"
+      responses:
+        "200":
+          description: Updated module
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminModule"
+    delete:
+      operationId: deleteAdminModule
+      tags: [admin]
+      summary: Delete a module
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deletion result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: { type: boolean }
+
 components:
   schemas:
     HealthStatus:
@@ -461,6 +552,44 @@ components:
         riskLevel:
           type: ["string", "null"]
           enum: [low, moderate, high, null]
+
+    AdminModule:
+      type: object
+      required: [slug, title, order, planSection, comingSoon, freeTier, printable, keyPoints]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        order: { type: integer }
+        planSection: { $ref: "#/components/schemas/PlanSection" }
+        durationMin: { type: ["integer", "null"] }
+        videoEmbedUrl: { type: ["string", "null"] }
+        body: { type: ["string", "null"] }
+        keyPoints:
+          type: array
+          items: { type: string }
+        comingSoon: { type: boolean }
+        freeTier: { type: boolean }
+        printable: { type: boolean }
+
+    AdminModuleInput:
+      type: object
+      required: [slug, title, order, planSection]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        order: { type: integer }
+        planSection: { $ref: "#/components/schemas/PlanSection" }
+        durationMin: { type: ["integer", "null"] }
+        videoEmbedUrl: { type: ["string", "null"] }
+        body: { type: ["string", "null"] }
+        keyPoints:
+          type: array
+          items: { type: string }
+        comingSoon: { type: boolean }
+        freeTier: { type: boolean }
+        printable: { type: boolean }
 
     AdminStats:
       type: object

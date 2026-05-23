@@ -251,3 +251,130 @@ export const GetAdminStatsResponse = zod.object({
 })
 
 
+/**
+ * @summary List every module with full editable fields (admin only)
+ */
+export const ListAdminModulesResponseItem = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullish(),
+  "order": zod.number(),
+  "planSection": zod.enum(['intro', 'ten_point', 'five_point', 'appendix_a', 'appendix_b']),
+  "durationMin": zod.number().nullish(),
+  "videoEmbedUrl": zod.string().nullish(),
+  "body": zod.string().nullish(),
+  "keyPoints": zod.array(zod.string()),
+  "comingSoon": zod.boolean(),
+  "freeTier": zod.boolean(),
+  "printable": zod.boolean()
+})
+export const ListAdminModulesResponse = zod.array(ListAdminModulesResponseItem)
+
+
+/**
+ * @summary Create a new module
+ */
+export const CreateAdminModuleBody = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullish(),
+  "order": zod.number(),
+  "planSection": zod.enum(['intro', 'ten_point', 'five_point', 'appendix_a', 'appendix_b']),
+  "durationMin": zod.number().nullish(),
+  "videoEmbedUrl": zod.string().nullish(),
+  "body": zod.string().nullish(),
+  "keyPoints": zod.array(zod.string()).optional(),
+  "comingSoon": zod.boolean().optional(),
+  "freeTier": zod.boolean().optional(),
+  "printable": zod.boolean().optional()
+})
+
+export const CreateAdminModuleResponse = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullish(),
+  "order": zod.number(),
+  "planSection": zod.enum(['intro', 'ten_point', 'five_point', 'appendix_a', 'appendix_b']),
+  "durationMin": zod.number().nullish(),
+  "videoEmbedUrl": zod.string().nullish(),
+  "body": zod.string().nullish(),
+  "keyPoints": zod.array(zod.string()),
+  "comingSoon": zod.boolean(),
+  "freeTier": zod.boolean(),
+  "printable": zod.boolean()
+})
+
+
+/**
+ * @summary Get a single module with full editable fields
+ */
+export const GetAdminModuleParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const GetAdminModuleResponse = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullish(),
+  "order": zod.number(),
+  "planSection": zod.enum(['intro', 'ten_point', 'five_point', 'appendix_a', 'appendix_b']),
+  "durationMin": zod.number().nullish(),
+  "videoEmbedUrl": zod.string().nullish(),
+  "body": zod.string().nullish(),
+  "keyPoints": zod.array(zod.string()),
+  "comingSoon": zod.boolean(),
+  "freeTier": zod.boolean(),
+  "printable": zod.boolean()
+})
+
+
+/**
+ * @summary Update an existing module
+ */
+export const UpdateAdminModuleParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const UpdateAdminModuleBody = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullish(),
+  "order": zod.number(),
+  "planSection": zod.enum(['intro', 'ten_point', 'five_point', 'appendix_a', 'appendix_b']),
+  "durationMin": zod.number().nullish(),
+  "videoEmbedUrl": zod.string().nullish(),
+  "body": zod.string().nullish(),
+  "keyPoints": zod.array(zod.string()).optional(),
+  "comingSoon": zod.boolean().optional(),
+  "freeTier": zod.boolean().optional(),
+  "printable": zod.boolean().optional()
+})
+
+export const UpdateAdminModuleResponse = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullish(),
+  "order": zod.number(),
+  "planSection": zod.enum(['intro', 'ten_point', 'five_point', 'appendix_a', 'appendix_b']),
+  "durationMin": zod.number().nullish(),
+  "videoEmbedUrl": zod.string().nullish(),
+  "body": zod.string().nullish(),
+  "keyPoints": zod.array(zod.string()),
+  "comingSoon": zod.boolean(),
+  "freeTier": zod.boolean(),
+  "printable": zod.boolean()
+})
+
+
+/**
+ * @summary Delete a module
+ */
+export const DeleteAdminModuleParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const DeleteAdminModuleResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+

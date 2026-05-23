@@ -25,7 +25,9 @@ const Library = lazy(() => import("./pages/library").then((m) => ({ default: m.L
 const Account = lazy(() => import("./pages/account/index").then((m) => ({ default: m.Account })));
 const Checkout = lazy(() => import("./pages/account/checkout").then((m) => ({ default: m.Checkout })));
 const Concierge = lazy(() => import("./pages/concierge").then((m) => ({ default: m.Concierge })));
-const Admin = lazy(() => import("./pages/admin").then((m) => ({ default: m.Admin })));
+const AdminOverview = lazy(() => import("./pages/admin/index").then((m) => ({ default: m.AdminOverview })));
+const AdminCourses = lazy(() => import("./pages/admin/courses").then((m) => ({ default: m.AdminCourses })));
+const AdminCourseEditor = lazy(() => import("./pages/admin/course-editor").then((m) => ({ default: m.AdminCourseEditor })));
 const AuthPage = lazy(() => import("./pages/auth").then((m) => ({ default: m.AuthPage })));
 const NotFound = lazy(() => import("./pages/not-found"));
 
@@ -86,7 +88,10 @@ function AppRoutes() {
           <Route path="/account" component={Account} />
           <Route path="/account/checkout/:plan" component={Checkout} />
           <Route path="/concierge" component={Concierge} />
-          <Route path="/admin" component={Admin} />
+          <Route path="/admin" component={AdminOverview} />
+          <Route path="/admin/courses" component={AdminCourses} />
+          <Route path="/admin/courses/new" component={AdminCourseEditor} />
+          <Route path="/admin/courses/:slug" component={AdminCourseEditor} />
 
           <Route component={NotFound} />
         </Switch>

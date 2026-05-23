@@ -8,6 +8,8 @@
 
 export * from './adminMember';
 export * from './adminMemberRiskLevel';
+export * from './adminModule';
+export * from './adminModuleInput';
 export * from './adminStats';
 export * from './assessmentInput';
 export * from './assessmentInputAnswersItem';
@@ -21,6 +23,7 @@ export * from './checkoutInputPlan';
 export * from './conciergeCheckIn';
 export * from './conciergeDashboard';
 export * from './conciergeNote';
+export * from './deleteAdminModule200';
 export * from './healthStatus';
 export * from './invoice';
 export * from './libraryItem';
