@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { useSignIn, useSignUp } from "@clerk/react";
+import { useState, useEffect, type FormEvent } from "react";
+import { useSignIn, useSignUp, useAuth } from "@clerk/react";
 import { useLocation } from "wouter";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -46,8 +46,13 @@ function getErrorMessage(err: unknown): string {
 
 export function AuthPage({ mode }: { mode: Mode }) {
   const [, setLocation] = useLocation();
+  const { isSignedIn } = useAuth();
   const { signIn, setActive: setSignInActive, isLoaded: signInLoaded } = useSignIn();
   const { signUp, setActive: setSignUpActive, isLoaded: signUpLoaded } = useSignUp();
+
+  useEffect(() => {
+    if (isSignedIn) setLocation("/dashboard");
+  }, [isSignedIn, setLocation]);
 
   const [step, setStep] = useState<"form" | "verify">("form");
   const [email, setEmail] = useState("");
@@ -197,6 +202,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
             </p>
           )}
         </div>
+        <div id="clerk-captcha" />
         <button type="submit" className={primaryBtn} disabled={busy || !isLoaded}>
           {busy ? "Please wait..." : isSignUp ? "Create my account" : "Sign in"}
         </button>
