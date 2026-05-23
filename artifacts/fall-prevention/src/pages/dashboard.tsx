@@ -22,12 +22,10 @@ import {
   Calendar,
   ArrowRight,
   CheckCircle2,
-  BookOpen,
   Video,
   FileText,
   Mic,
   ClipboardList,
-  LifeBuoy,
   Lock,
   Clock,
 } from "lucide-react";
@@ -122,9 +120,18 @@ function DashboardContent() {
           <h1 className="font-serif text-3xl md:text-5xl font-bold text-primary leading-tight">
             Welcome back, {firstName}.
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mt-3 max-w-2xl">
-            Here's where to pick up today — your next step, your upcoming sessions, and your library.
-          </p>
+          {assessment && (
+            <div className="mt-4 inline-flex items-center gap-2 text-base text-muted-foreground">
+              <CheckCircle2 className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span>
+                Risk profile: <span className="font-semibold text-foreground">{assessment.headline}</span>
+              </span>
+              <span aria-hidden="true" className="text-muted-foreground/50">·</span>
+              <Link href="/assessment" className="text-primary font-semibold hover:underline">
+                Retake
+              </Link>
+            </div>
+          )}
         </header>
 
         {/* HERO: Your Next Step */}
@@ -153,7 +160,7 @@ function DashboardContent() {
                         ? "Continue at your own pace — every session is recorded."
                         : "A few quick questions to set your baseline. Takes about 5 minutes.")}
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div>
                     {planStats?.nextModule ? (
                       <Link href={`/modules/${planStats.nextModule.slug}`}>
                         <Button className="min-h-[56px] rounded-full px-8 text-lg font-bold w-full sm:w-auto">
@@ -169,14 +176,6 @@ function DashboardContent() {
                         </Button>
                       </Link>
                     )}
-                    <Link href="/modules">
-                      <Button
-                        variant="outline"
-                        className="min-h-[56px] rounded-full px-8 text-lg w-full sm:w-auto"
-                      >
-                        See the whole plan
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -184,70 +183,8 @@ function DashboardContent() {
           </Card>
         </section>
 
-        {/* Three big areas */}
-        <section className="grid gap-6 md:gap-8 md:grid-cols-3 mb-10" aria-label="Main areas">
-          {/* Your Plan */}
-          <Card className="border-border shadow-md flex flex-col">
-            <CardContent className="p-6 md:p-7 flex-1 flex flex-col">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-primary/10 rounded-full p-2.5">
-                  <BookOpen className="w-6 h-6 text-primary" aria-hidden="true" />
-                </div>
-                <h3 className="font-serif text-2xl font-bold">Your Plan</h3>
-              </div>
-              <p className="text-lg text-muted-foreground mb-5">
-                Where you are in the 10-Point Plan.
-              </p>
-
-              {planStats && (
-                <>
-                  <div className="mb-5">
-                    <div
-                      className="flex items-baseline justify-between mb-2"
-                      aria-label={`${planStats.availableCount} of ${planStats.totalInPlan} modules available`}
-                    >
-                      <span className="text-3xl font-serif font-bold text-primary">
-                        {planStats.availableCount}
-                      </span>
-                      <span className="text-base text-muted-foreground font-semibold">
-                        of {planStats.totalInPlan} modules ready
-                      </span>
-                    </div>
-                    <div
-                      className="w-full h-3 bg-muted rounded-full overflow-hidden"
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={planStats.totalInPlan}
-                      aria-valuenow={planStats.availableCount}
-                    >
-                      <div
-                        className="h-full bg-primary transition-all"
-                        style={{
-                          width: `${Math.max(
-                            6,
-                            (planStats.availableCount / Math.max(1, planStats.totalInPlan)) * 100,
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {planStats.lockedCount > 0 && (
-                    <p className="text-base text-muted-foreground mb-5">
-                      {planStats.lockedCount} more {planStats.lockedCount === 1 ? "module" : "modules"} unlock with a membership.
-                    </p>
-                  )}
-                </>
-              )}
-
-              <Link href="/modules" className="mt-auto">
-                <Button className="w-full min-h-[52px] rounded-full text-lg font-bold">
-                  Go to the Plan <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
+        {/* Two big areas: Live Sessions + Library */}
+        <section className="grid gap-6 md:gap-8 md:grid-cols-2 mb-10" aria-label="Main areas">
           {/* Live Sessions */}
           <Card className="border-border shadow-md flex flex-col">
             <CardContent className="p-6 md:p-7 flex-1 flex flex-col">
@@ -366,24 +303,16 @@ function DashboardContent() {
         {/* Complete 10-Point Plan gallery */}
         {planStats && planStats.plan.length > 0 && (
           <section className="mb-10" aria-labelledby="full-plan-heading">
-            <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-              <div>
-                <h2
-                  id="full-plan-heading"
-                  className="font-serif text-2xl md:text-3xl font-bold text-primary mb-1"
-                >
-                  The complete 10-Point Plan
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  All ten modules — take them in order, at your own pace.
-                </p>
-              </div>
-              <Link
-                href="/modules"
-                className="text-primary font-bold hover:underline inline-flex items-center gap-2 text-lg min-h-[44px]"
+            <div className="mb-6">
+              <h2
+                id="full-plan-heading"
+                className="font-serif text-2xl md:text-3xl font-bold text-primary mb-1"
               >
-                View full program <ArrowRight className="w-5 h-5" aria-hidden="true" />
-              </Link>
+                The complete 10-Point Plan
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                All ten modules — take them in order, at your own pace.
+              </p>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -467,63 +396,6 @@ function DashboardContent() {
           </section>
         )}
 
-        {/* Footer row: assessment status + help */}
-        <section className="grid gap-6 md:grid-cols-2" aria-label="Quick links">
-          {assessment ? (
-            <Card className="border-border shadow-sm">
-              <CardContent className="p-6 flex items-center gap-5">
-                <CheckCircle2 className="w-10 h-10 text-primary shrink-0" aria-hidden="true" />
-                <div className="flex-1">
-                  <p className="font-serif text-lg font-bold leading-tight mb-1">
-                    Your risk profile: {assessment.headline}
-                  </p>
-                  <p className="text-base text-muted-foreground">
-                    Taken {format(new Date(assessment.completedAt), "MMM d, yyyy")}
-                  </p>
-                </div>
-                <Link href="/assessment">
-                  <Button variant="outline" className="min-h-[48px] rounded-full">
-                    Retake
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-primary/30 border-2 shadow-sm bg-primary/5">
-              <CardContent className="p-6 flex items-center gap-5">
-                <ClipboardList className="w-10 h-10 text-primary shrink-0" aria-hidden="true" />
-                <div className="flex-1">
-                  <p className="font-serif text-lg font-bold leading-tight mb-1">
-                    Take the Self-Assessment
-                  </p>
-                  <p className="text-base text-muted-foreground">
-                    A 5-minute check to set your baseline.
-                  </p>
-                </div>
-                <Link href="/assessment">
-                  <Button className="min-h-[48px] rounded-full px-6 font-bold">Start</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className="border-border shadow-sm">
-            <CardContent className="p-6 flex items-center gap-5">
-              <LifeBuoy className="w-10 h-10 text-primary shrink-0" aria-hidden="true" />
-              <div className="flex-1">
-                <p className="font-serif text-lg font-bold leading-tight mb-1">Need a hand?</p>
-                <p className="text-base text-muted-foreground">
-                  Question about an exercise, your account, or anything else.
-                </p>
-              </div>
-              <Link href="/contact">
-                <Button variant="outline" className="min-h-[48px] rounded-full">
-                  Contact us
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </section>
       </div>
     </div>
   );
