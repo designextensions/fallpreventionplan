@@ -372,12 +372,9 @@ router.get("/concierge/me", async (req, res): Promise<void> => {
   );
 });
 
-router.get("/admin/members", async (req, res): Promise<void> => {
-  const me = await getCurrentUser(req);
-  if (me.tier !== "admin") {
-    res.status(403).json({ error: "Admin access required." });
-    return;
-  }
+router.get("/admin/members", async (_req, res): Promise<void> => {
+  // Demo mode: admin endpoints are intentionally open so anyone demoing
+  // the prototype can explore the back office without signing in.
   const users = await db.select().from(usersTable).orderBy(desc(usersTable.createdAt));
   const out = await Promise.all(
     users.map(async (u) => {
@@ -402,12 +399,8 @@ router.get("/admin/members", async (req, res): Promise<void> => {
   res.json(ListAdminMembersResponse.parse(out));
 });
 
-router.get("/admin/stats", async (req, res): Promise<void> => {
-  const me = await getCurrentUser(req);
-  if (me.tier !== "admin") {
-    res.status(403).json({ error: "Admin access required." });
-    return;
-  }
+router.get("/admin/stats", async (_req, res): Promise<void> => {
+  // Demo mode: open access.
   const users = await db.select().from(usersTable);
   const assessments = await db.select().from(assessmentsTable);
   let mrr = 0;
@@ -439,14 +432,8 @@ router.get("/admin/stats", async (req, res): Promise<void> => {
 
 // ---------- Admin: Course (module) management ----------
 
-async function requireAdmin(req: Request, res: Response): Promise<boolean> {
-  const me = await getCurrentUser(req);
-  if (me.tier !== "admin") {
-    res.status(403).json({ error: "Admin access required." });
-    return false;
-  }
-  return true;
-}
+// Demo mode: admin module endpoints are intentionally open access.
+// Re-add a requireAdmin gate here if/when real auth is introduced.
 
 function toAdminModule(row: typeof modulesTable.$inferSelect) {
   return {
@@ -471,13 +458,11 @@ function toAdminModule(row: typeof modulesTable.$inferSelect) {
 }
 
 router.get("/admin/modules", async (req, res): Promise<void> => {
-  if (!(await requireAdmin(req, res))) return;
   const rows = await db.select().from(modulesTable).orderBy(asc(modulesTable.order));
   res.json(ListAdminModulesResponse.parse(rows.map(toAdminModule)));
 });
 
 router.get("/admin/modules/:slug", async (req, res): Promise<void> => {
-  if (!(await requireAdmin(req, res))) return;
   const params = GetAdminModuleParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -495,7 +480,6 @@ router.get("/admin/modules/:slug", async (req, res): Promise<void> => {
 });
 
 router.post("/admin/modules", async (req, res): Promise<void> => {
-  if (!(await requireAdmin(req, res))) return;
   const body = CreateAdminModuleBody.safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: body.error.message });
@@ -530,7 +514,6 @@ router.post("/admin/modules", async (req, res): Promise<void> => {
 });
 
 router.put("/admin/modules/:slug", async (req, res): Promise<void> => {
-  if (!(await requireAdmin(req, res))) return;
   const params = UpdateAdminModuleParams.safeParse(req.params);
   const body = UpdateAdminModuleBody.safeParse(req.body);
   if (!params.success || !body.success) {
@@ -580,7 +563,6 @@ router.put("/admin/modules/:slug", async (req, res): Promise<void> => {
 });
 
 router.delete("/admin/modules/:slug", async (req, res): Promise<void> => {
-  if (!(await requireAdmin(req, res))) return;
   const params = DeleteAdminModuleParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });

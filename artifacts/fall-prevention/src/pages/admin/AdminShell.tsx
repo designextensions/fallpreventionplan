@@ -1,15 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
-import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
-import { Card, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import {
-  LayoutDashboard,
-  BookOpen,
-  Users,
-  ShieldAlert,
-} from "lucide-react";
+import { LayoutDashboard, BookOpen, Users } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -23,40 +14,7 @@ function isActive(currentPath: string, href: string, exact: boolean): boolean {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  return (
-    <ProtectedRoute>
-      <AdminGate>{children}</AdminGate>
-    </ProtectedRoute>
-  );
-}
-
-function AdminGate({ children }: { children: ReactNode }) {
-  const { data: me, isLoading } = useGetMe({ query: { queryKey: getGetMeQueryKey() } });
   const [location] = useLocation();
-
-  if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-8 bg-muted/30">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (me?.tier !== "admin") {
-    return (
-      <div className="flex-1 flex items-center justify-center p-4 bg-muted/30">
-        <Card className="max-w-md w-full border-destructive shadow-xl">
-          <CardContent className="pt-10 pb-8 px-8 text-center">
-            <ShieldAlert className="w-16 h-16 text-destructive mx-auto mb-6" />
-            <h2 className="font-serif text-2xl font-bold mb-3">Access denied</h2>
-            <p className="text-lg text-muted-foreground">
-              This portal is restricted to program administrators.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 bg-muted/30">
@@ -66,9 +24,9 @@ function AdminGate({ children }: { children: ReactNode }) {
           <aside className="md:w-60 shrink-0">
             <div className="mb-6">
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                Admin
+                Demo Admin
               </p>
-              <h2 className="font-serif text-xl font-bold">{me.name ?? "Administrator"}</h2>
+              <h2 className="font-serif text-xl font-bold">Open access</h2>
             </div>
             <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible -mx-2 px-2">
               {NAV.map((item) => {
