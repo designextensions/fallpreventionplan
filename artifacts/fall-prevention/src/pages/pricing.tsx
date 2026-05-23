@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Info } from "lucide-react";
 import { useGetMe } from "@workspace/api-client-react";
-import { Show } from "@clerk/react";
+import { useDemoAuth } from "@/lib/demoAuth";
 
 export function Pricing() {
   const [, setLocation] = useLocation();
-  const { data: me } = useGetMe();
+  const { isSignedIn } = useDemoAuth();
+  const { data: me } = useGetMe({ query: { enabled: isSignedIn } });
 
   const handleSelectPlan = (plan: string) => {
-    if (me?.signedIn) {
+    if (isSignedIn) {
       if (plan === 'concierge') {
         setLocation('/contact?plan=concierge');
       } else {

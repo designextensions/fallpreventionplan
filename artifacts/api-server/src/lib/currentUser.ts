@@ -1,5 +1,4 @@
 import type { Request } from "express";
-import { getAuth, clerkClient } from "@clerk/express";
 import { eq } from "drizzle-orm";
 import { db, usersTable, type User } from "@workspace/db";
 
@@ -18,54 +17,53 @@ const ADMIN_EMAILS = new Set(
     .filter(Boolean),
 );
 
-export async function getCurrentUser(req: Request): Promise<CurrentUser> {
-  const auth = getAuth(req);
-  const clerkUserId: string | undefined =
-    (auth?.sessionClaims as { userId?: string } | undefined)?.userId ?? auth?.userId ?? undefined;
+function parseDemoAuth(req: Request): { email: string; name: string | null; tier: Tier } | null {
+  const header = req.header("authorization");
+  if (!header) return null;
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match) return null;
+  let payload: { email?: string; name?: string | null; tier?: Tier };
+  try {
+    payload = JSON.parse(atob(match[1]!));
+  } catch {
+    return null;
+  }
+  const email = (payload.email ?? "").trim().toLowerCase();
+  if (!email) return null;
+  const tier: Tier = ADMIN_EMAILS.has(email)
+    ? "admin"
+    : (payload.tier ?? "subscription");
+  return { email, name: payload.name ?? null, tier };
+}
 
-  if (!clerkUserId) {
+export async function getCurrentUser(req: Request): Promise<CurrentUser> {
+  const demo = parseDemoAuth(req);
+  if (!demo) {
     return { signedIn: false, tier: "guest", user: null };
   }
 
   const existing = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.clerkId, clerkUserId))
+    .where(eq(usersTable.email, demo.email))
     .limit(1);
 
   if (existing.length > 0) {
     const user = existing[0]!;
-    await db
+    // Keep tier in sync when admin email is configured.
+    const desiredTier = ADMIN_EMAILS.has(demo.email) ? "admin" : user.tier;
+    const [updated] = await db
       .update(usersTable)
-      .set({ lastLoginAt: new Date() })
-      .where(eq(usersTable.id, user.id));
-    return { signedIn: true, tier: user.tier as Tier, user };
+      .set({ lastLoginAt: new Date(), tier: desiredTier, name: demo.name ?? user.name })
+      .where(eq(usersTable.id, user.id))
+      .returning();
+    return { signedIn: true, tier: (updated?.tier as Tier) ?? "guest", user: updated ?? user };
   }
-
-  let email = "";
-  let name: string | null = null;
-  try {
-    const clerkUser = await clerkClient.users.getUser(clerkUserId);
-    email =
-      clerkUser.primaryEmailAddress?.emailAddress ??
-      clerkUser.emailAddresses[0]?.emailAddress ??
-      "";
-    const parts = [clerkUser.firstName, clerkUser.lastName]
-      .filter((s): s is string => !!s)
-      .join(" ");
-    name = parts || clerkUser.username || null;
-  } catch {
-    // best-effort
-  }
-
-  const tier: Tier = ADMIN_EMAILS.has(email.toLowerCase())
-    ? "admin"
-    : "guest";
 
   const [created] = await db
     .insert(usersTable)
-    .values({ clerkId: clerkUserId, email, name, tier })
+    .values({ email: demo.email, name: demo.name, tier: demo.tier })
     .returning();
 
-  return { signedIn: true, tier, user: created ?? null };
+  return { signedIn: true, tier: demo.tier, user: created ?? null };
 }
