@@ -59,6 +59,14 @@ export function Footer() {
                   Terms of Service
                 </span>
               </li>
+              <li className="pt-2 border-t border-border/60">
+                <Link
+                  href="/admin"
+                  className="text-xs uppercase tracking-wider text-muted-foreground/70 hover:text-primary transition-colors min-h-[44px] inline-flex items-center font-semibold"
+                >
+                  Admin (demo)
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
