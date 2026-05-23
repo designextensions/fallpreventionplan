@@ -1,11 +1,34 @@
-import { useGetMe, useGetMyAssessment, useListUpcomingSessions, getGetMeQueryKey, getGetMyAssessmentQueryKey, getListUpcomingSessionsQueryKey } from "@workspace/api-client-react";
-import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
 import { Link } from "wouter";
-import { PlayCircle, Calendar, ArrowRight, ShieldAlert, CheckCircle2, AlertCircle } from "lucide-react";
-import { format } from "date-fns";
+import { format, isToday, isTomorrow, isThisWeek, differenceInCalendarDays } from "date-fns";
+import {
+  useGetMe,
+  useGetMyAssessment,
+  useListUpcomingSessions,
+  useListModules,
+  useListLibraryItems,
+  getGetMeQueryKey,
+  getGetMyAssessmentQueryKey,
+  getListUpcomingSessionsQueryKey,
+  getListModulesQueryKey,
+  getListLibraryItemsQueryKey,
+} from "@workspace/api-client-react";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  PlayCircle,
+  Calendar,
+  ArrowRight,
+  CheckCircle2,
+  BookOpen,
+  Video,
+  FileText,
+  Mic,
+  ClipboardList,
+  LifeBuoy,
+} from "lucide-react";
 
 export function Dashboard() {
   return (
@@ -15,12 +38,63 @@ export function Dashboard() {
   );
 }
 
-function DashboardContent() {
-  const { data: me, isLoading: meLoading } = useGetMe({ query: { queryKey: getGetMeQueryKey() } });
-  const { data: assessment, isLoading: assessmentLoading } = useGetMyAssessment({ query: { queryKey: getGetMyAssessmentQueryKey() } });
-  const { data: sessions, isLoading: sessionsLoading } = useListUpcomingSessions({ query: { queryKey: getListUpcomingSessionsQueryKey() } });
+function friendlyDate(d: Date): string {
+  if (isToday(d)) return `Today at ${format(d, "h:mm a")}`;
+  if (isTomorrow(d)) return `Tomorrow at ${format(d, "h:mm a")}`;
+  if (isThisWeek(d, { weekStartsOn: 0 })) {
+    return `${format(d, "EEEE")} at ${format(d, "h:mm a")}`;
+  }
+  const days = differenceInCalendarDays(d, new Date());
+  if (days >= 0 && days < 14) return format(d, "EEEE, MMM d • h:mm a");
+  return format(d, "MMM d, yyyy • h:mm a");
+}
 
-  const isLoading = meLoading || assessmentLoading || sessionsLoading;
+function todayHeading(): string {
+  return format(new Date(), "EEEE, MMMM d");
+}
+
+function DashboardContent() {
+  const { data: me, isLoading: meLoading } = useGetMe({
+    query: { queryKey: getGetMeQueryKey() },
+  });
+  const { data: assessment, isLoading: assessmentLoading } = useGetMyAssessment({
+    query: { queryKey: getGetMyAssessmentQueryKey() },
+  });
+  const { data: sessions, isLoading: sessionsLoading } = useListUpcomingSessions({
+    query: { queryKey: getListUpcomingSessionsQueryKey() },
+  });
+  const { data: modules, isLoading: modulesLoading } = useListModules({
+    query: { queryKey: getListModulesQueryKey() },
+  });
+  const { data: library, isLoading: libraryLoading } = useListLibraryItems({
+    query: { queryKey: getListLibraryItemsQueryKey() },
+  });
+
+  const isLoading =
+    meLoading || assessmentLoading || sessionsLoading || modulesLoading || libraryLoading;
+
+  // Compute "where you are in the plan"
+  const planStats = useMemo(() => {
+    if (!modules) return null;
+    const plan = modules
+      .filter((m) => m.planSection === "ten_point")
+      .sort((a, b) => a.order - b.order);
+    const available = plan.filter((m) => !m.locked && !m.comingSoon);
+    const next = available[0] ?? plan[0] ?? null;
+    return {
+      totalInPlan: plan.length,
+      availableCount: available.length,
+      nextModule: next,
+      lockedCount: plan.length - available.length,
+    };
+  }, [modules]);
+
+  const nextSession = sessions && sessions.length > 0 ? sessions[0] : null;
+  const upcomingThree = sessions?.slice(0, 3) ?? [];
+  const featuredLibrary = library?.slice(0, 3) ?? [];
+
+  const firstName = me?.name?.split(" ")[0] || "Member";
+  const hasLiveAccess = me?.tier === "subscription" || me?.tier === "concierge" || me?.tier === "admin";
 
   if (isLoading) {
     return (
@@ -30,165 +104,321 @@ function DashboardContent() {
     );
   }
 
-  const nextSession = sessions && sessions.length > 0 ? sessions[0] : null;
-
   return (
     <div className="flex-1 bg-muted/30 py-8 md:py-12">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="mb-10">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-2">
-            Welcome back, {me?.name?.split(' ')[0] || 'Member'}
+        {/* Greeting */}
+        <header className="mb-8 md:mb-10">
+          <p className="text-base md:text-lg text-muted-foreground mb-1">{todayHeading()}</p>
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-primary leading-tight">
+            Welcome back, {firstName}.
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Current plan: <span className="font-bold capitalize">{me?.tier.replace('_', ' ')}</span>
+          <p className="text-lg md:text-xl text-muted-foreground mt-3 max-w-2xl">
+            Here's where to pick up today — your next step, your upcoming sessions, and your library.
           </p>
-        </div>
+        </header>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Main Column */}
-          <div className="md:col-span-2 space-y-8">
-            
-            {/* Continue Learning */}
-            <Card className="border-border shadow-md overflow-hidden">
-              <div className="h-2 bg-primary w-full"></div>
-              <CardHeader>
-                <CardTitle className="font-serif text-2xl">The 10-Point Plan</CardTitle>
-                <CardDescription className="text-lg">Continue your progression</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-muted/50 rounded-xl p-6 border border-border mb-6">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 p-3 rounded-full shrink-0">
-                      <PlayCircle className="w-8 h-8 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-xl font-bold mb-2">Module 1: Understanding Your Risk</h4>
-                      <p className="text-muted-foreground mb-4">Learn the primary factors that contribute to falls and how to spot them in your environment.</p>
-                      <Link href="/modules/module-1">
-                        <Button className="min-h-[48px] rounded-full px-6 text-base font-bold">
-                          Resume Module
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
+        {/* HERO: Your Next Step */}
+        <section className="mb-10" aria-labelledby="next-step-heading">
+          <Card className="border-2 border-primary/30 shadow-lg overflow-hidden">
+            <div className="h-2 bg-primary w-full" aria-hidden="true" />
+            <CardContent className="p-6 md:p-10">
+              <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+                <div className="bg-primary/10 rounded-full p-6 shrink-0 self-start md:self-auto">
+                  <PlayCircle className="w-14 h-14 text-primary" aria-hidden="true" />
                 </div>
-                <div className="flex justify-end">
-                  <Link href="/modules" className="text-primary font-bold hover:underline flex items-center gap-2 text-lg min-h-[48px]">
-                    View all modules <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Assessment Result */}
-            {assessment && (
-              <Card className="border-border shadow-md">
-                <CardHeader>
-                  <CardTitle className="font-serif text-2xl">Your Risk Profile</CardTitle>
-                  <CardDescription className="text-lg">Based on your latest assessment</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-6 p-6 rounded-xl border border-border bg-card">
-                    <div className="shrink-0">
-                      {assessment.level === 'low' && <CheckCircle2 className="w-12 h-12 text-primary" />}
-                      {assessment.level === 'moderate' && <AlertCircle className="w-12 h-12 text-accent" />}
-                      {assessment.level === 'high' && <ShieldAlert className="w-12 h-12 text-destructive" />}
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-xl font-bold mb-1">{assessment.headline}</h4>
-                      <p className="text-muted-foreground">Score: {assessment.score} • Taken {format(new Date(assessment.completedAt), "MMM d, yyyy")}</p>
-                    </div>
-                    <div className="ml-auto">
-                      <Link href="/assessment">
-                        <Button variant="outline" className="min-h-[48px] rounded-full">
-                          Retake
+                <div className="flex-1">
+                  <p className="text-base font-bold uppercase tracking-wider text-primary mb-2">
+                    Your next step
+                  </p>
+                  <h2 id="next-step-heading" className="font-serif text-2xl md:text-3xl font-bold mb-3">
+                    {planStats?.nextModule
+                      ? planStats.nextModule.title
+                      : assessment
+                      ? "Browse your library"
+                      : "Start with the Self-Assessment"}
+                  </h2>
+                  <p className="text-lg text-muted-foreground mb-6 max-w-xl">
+                    {planStats?.nextModule?.subtitle ??
+                      (assessment
+                        ? "Continue at your own pace — every session is recorded."
+                        : "A few quick questions to set your baseline. Takes about 5 minutes.")}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {planStats?.nextModule ? (
+                      <Link href={`/modules/${planStats.nextModule.slug}`}>
+                        <Button className="min-h-[56px] rounded-full px-8 text-lg font-bold w-full sm:w-auto">
+                          <PlayCircle className="w-5 h-5 mr-2" aria-hidden="true" />
+                          Start this module
                         </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {!assessment && (
-               <Card className="border-border shadow-md bg-primary/5 border-primary/20">
-               <CardHeader>
-                 <CardTitle className="font-serif text-2xl">Take the Self-Assessment</CardTitle>
-                 <CardDescription className="text-lg">Establish your baseline risk profile</CardDescription>
-               </CardHeader>
-               <CardContent>
-                 <Link href="/assessment">
-                   <Button className="min-h-[48px] rounded-full px-8 text-base">
-                     Start Assessment
-                   </Button>
-                 </Link>
-               </CardContent>
-             </Card>
-            )}
-
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-8">
-            <Card className="border-border shadow-md">
-              <CardHeader className="pb-4 border-b border-border/50">
-                <CardTitle className="font-serif text-xl flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" /> Upcoming Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {nextSession ? (
-                  <div className="space-y-4">
-                    <div>
-                      <span className="inline-block bg-muted text-muted-foreground text-xs font-bold px-2 py-1 rounded mb-2 uppercase tracking-wider">
-                        {nextSession.kind.replace('_', ' ')}
-                      </span>
-                      <h4 className="font-serif font-bold text-lg leading-tight mb-1">{nextSession.title}</h4>
-                      <p className="text-primary font-semibold">
-                        {format(new Date(nextSession.startsAt), "MMM d • h:mm a")}
-                      </p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Host: {nextSession.host}</p>
-                    
-                    {me?.tier !== 'one_time' && me?.tier !== 'guest' ? (
-                      <Link href="/sessions">
-                        <Button className="w-full min-h-[48px] rounded-full mt-2">View Details</Button>
                       </Link>
                     ) : (
-                      <div className="mt-4 p-4 bg-muted/50 rounded-lg text-center">
-                        <p className="text-sm text-muted-foreground mb-3">Live sessions are available on the Community Plus plan.</p>
-                        <Link href="/account">
-                          <Button variant="outline" size="sm" className="w-full min-h-[40px] rounded-full">Upgrade</Button>
-                        </Link>
-                      </div>
+                      <Link href="/assessment">
+                        <Button className="min-h-[56px] rounded-full px-8 text-lg font-bold w-full sm:w-auto">
+                          <ClipboardList className="w-5 h-5 mr-2" aria-hidden="true" />
+                          Take the assessment
+                        </Button>
+                      </Link>
                     )}
+                    <Link href="/modules">
+                      <Button
+                        variant="outline"
+                        className="min-h-[56px] rounded-full px-8 text-lg w-full sm:w-auto"
+                      >
+                        See the whole plan
+                      </Button>
+                    </Link>
                   </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">No upcoming sessions scheduled.</p>
-                )}
-                
-                <div className="mt-6 pt-4 border-t border-border text-center">
-                  <Link href="/sessions" className="text-primary font-bold hover:underline text-sm inline-flex min-h-[44px] items-center">
-                    View Full Schedule
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Three big areas */}
+        <section className="grid gap-6 md:gap-8 md:grid-cols-3 mb-10" aria-label="Main areas">
+          {/* Your Plan */}
+          <Card className="border-border shadow-md flex flex-col">
+            <CardContent className="p-6 md:p-7 flex-1 flex flex-col">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-primary/10 rounded-full p-2.5">
+                  <BookOpen className="w-6 h-6 text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold">Your Plan</h3>
+              </div>
+              <p className="text-lg text-muted-foreground mb-5">
+                Where you are in the 10-Point Plan.
+              </p>
+
+              {planStats && (
+                <>
+                  <div className="mb-5">
+                    <div
+                      className="flex items-baseline justify-between mb-2"
+                      aria-label={`${planStats.availableCount} of ${planStats.totalInPlan} modules available`}
+                    >
+                      <span className="text-3xl font-serif font-bold text-primary">
+                        {planStats.availableCount}
+                      </span>
+                      <span className="text-base text-muted-foreground font-semibold">
+                        of {planStats.totalInPlan} modules ready
+                      </span>
+                    </div>
+                    <div
+                      className="w-full h-3 bg-muted rounded-full overflow-hidden"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={planStats.totalInPlan}
+                      aria-valuenow={planStats.availableCount}
+                    >
+                      <div
+                        className="h-full bg-primary transition-all"
+                        style={{
+                          width: `${Math.max(
+                            6,
+                            (planStats.availableCount / Math.max(1, planStats.totalInPlan)) * 100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {planStats.lockedCount > 0 && (
+                    <p className="text-base text-muted-foreground mb-5">
+                      {planStats.lockedCount} more {planStats.lockedCount === 1 ? "module" : "modules"} unlock with a membership.
+                    </p>
+                  )}
+                </>
+              )}
+
+              <Link href="/modules" className="mt-auto">
+                <Button className="w-full min-h-[52px] rounded-full text-lg font-bold">
+                  Go to the Plan <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Live Sessions */}
+          <Card className="border-border shadow-md flex flex-col">
+            <CardContent className="p-6 md:p-7 flex-1 flex flex-col">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-primary/10 rounded-full p-2.5">
+                  <Calendar className="w-6 h-6 text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold">Live Sessions</h3>
+              </div>
+              <p className="text-lg text-muted-foreground mb-5">
+                Join your therapist and other members.
+              </p>
+
+              {nextSession ? (
+                <div className="space-y-4 mb-5">
+                  {upcomingThree.map((s, idx) => (
+                    <div
+                      key={s.id}
+                      className={`rounded-xl p-4 border ${
+                        idx === 0
+                          ? "border-primary/30 bg-primary/5"
+                          : "border-border bg-muted/30"
+                      }`}
+                    >
+                      {idx === 0 && (
+                        <span className="inline-block text-xs font-bold uppercase tracking-wider text-primary mb-1">
+                          Next up
+                        </span>
+                      )}
+                      <p className="font-serif text-lg font-bold leading-tight mb-1">{s.title}</p>
+                      <p className="text-base text-primary font-semibold">
+                        {friendlyDate(new Date(s.startsAt))}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">with {s.host}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-base text-muted-foreground bg-muted/40 rounded-xl p-4 mb-5">
+                  No sessions on the calendar right now. Check back soon.
+                </p>
+              )}
+
+              {hasLiveAccess ? (
+                <Link href="/sessions" className="mt-auto">
+                  <Button className="w-full min-h-[52px] rounded-full text-lg font-bold">
+                    See full schedule <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
+                  </Button>
+                </Link>
+              ) : (
+                <div className="mt-auto">
+                  <p className="text-base text-muted-foreground mb-3 text-center">
+                    Live sessions are part of the Membership plan.
+                  </p>
+                  <Link href="/pricing">
+                    <Button
+                      variant="outline"
+                      className="w-full min-h-[52px] rounded-full text-lg"
+                    >
+                      View plans
+                    </Button>
                   </Link>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </CardContent>
+          </Card>
 
-            <Card className="border-border shadow-md bg-card">
-              <CardContent className="p-6">
-                <h4 className="font-serif font-bold text-lg mb-2">Need help?</h4>
-                <p className="text-sm text-muted-foreground mb-4">Have questions about an exercise or need technical support?</p>
-                <Link href="/contact">
-                  <Button variant="outline" className="w-full min-h-[48px] rounded-full border-primary/20">
-                    Contact Support
+          {/* Library */}
+          <Card className="border-border shadow-md flex flex-col">
+            <CardContent className="p-6 md:p-7 flex-1 flex flex-col">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-primary/10 rounded-full p-2.5">
+                  <Video className="w-6 h-6 text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold">Your Library</h3>
+              </div>
+              <p className="text-lg text-muted-foreground mb-5">
+                Recorded classes, articles, and interviews.
+              </p>
+
+              {featuredLibrary.length > 0 ? (
+                <ul className="space-y-3 mb-5">
+                  {featuredLibrary.map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        href="/library"
+                        className="flex items-start gap-3 rounded-xl p-3 -mx-1 hover:bg-muted/50 transition-colors"
+                      >
+                        <LibraryKindIcon kind={item.kind} />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-base leading-snug">{item.title}</p>
+                          <p className="text-sm text-muted-foreground capitalize mt-0.5">
+                            {item.kind}
+                            {item.durationMin ? ` • ${item.durationMin} min` : ""}
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-base text-muted-foreground bg-muted/40 rounded-xl p-4 mb-5">
+                  No items yet — new content is added each week.
+                </p>
+              )}
+
+              <Link href="/library" className="mt-auto">
+                <Button className="w-full min-h-[52px] rounded-full text-lg font-bold">
+                  Open library <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Footer row: assessment status + help */}
+        <section className="grid gap-6 md:grid-cols-2" aria-label="Quick links">
+          {assessment ? (
+            <Card className="border-border shadow-sm">
+              <CardContent className="p-6 flex items-center gap-5">
+                <CheckCircle2 className="w-10 h-10 text-primary shrink-0" aria-hidden="true" />
+                <div className="flex-1">
+                  <p className="font-serif text-lg font-bold leading-tight mb-1">
+                    Your risk profile: {assessment.headline}
+                  </p>
+                  <p className="text-base text-muted-foreground">
+                    Taken {format(new Date(assessment.completedAt), "MMM d, yyyy")}
+                  </p>
+                </div>
+                <Link href="/assessment">
+                  <Button variant="outline" className="min-h-[48px] rounded-full">
+                    Retake
                   </Button>
                 </Link>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          ) : (
+            <Card className="border-primary/30 border-2 shadow-sm bg-primary/5">
+              <CardContent className="p-6 flex items-center gap-5">
+                <ClipboardList className="w-10 h-10 text-primary shrink-0" aria-hidden="true" />
+                <div className="flex-1">
+                  <p className="font-serif text-lg font-bold leading-tight mb-1">
+                    Take the Self-Assessment
+                  </p>
+                  <p className="text-base text-muted-foreground">
+                    A 5-minute check to set your baseline.
+                  </p>
+                </div>
+                <Link href="/assessment">
+                  <Button className="min-h-[48px] rounded-full px-6 font-bold">Start</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-6 flex items-center gap-5">
+              <LifeBuoy className="w-10 h-10 text-primary shrink-0" aria-hidden="true" />
+              <div className="flex-1">
+                <p className="font-serif text-lg font-bold leading-tight mb-1">Need a hand?</p>
+                <p className="text-base text-muted-foreground">
+                  Question about an exercise, your account, or anything else.
+                </p>
+              </div>
+              <Link href="/contact">
+                <Button variant="outline" className="min-h-[48px] rounded-full">
+                  Contact us
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </div>
   );
+}
+
+function LibraryKindIcon({ kind }: { kind: "recording" | "article" | "interview" }) {
+  const wrapper = "rounded-lg p-2 shrink-0 bg-primary/10 text-primary";
+  if (kind === "recording") return <div className={wrapper}><Video className="w-5 h-5" aria-hidden="true" /></div>;
+  if (kind === "article") return <div className={wrapper}><FileText className="w-5 h-5" aria-hidden="true" /></div>;
+  return <div className={wrapper}><Mic className="w-5 h-5" aria-hidden="true" /></div>;
 }
