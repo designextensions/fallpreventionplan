@@ -27,7 +27,7 @@ export function Assessment() {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-background">
-        <Spinner size="lg" className="text-primary" />
+        <Spinner className="size-8 text-primary" />
       </div>
     );
   }

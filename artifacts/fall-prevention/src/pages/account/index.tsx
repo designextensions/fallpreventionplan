@@ -24,7 +24,7 @@ function AccountContent() {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <Spinner size="lg" className="text-primary" />
+        <Spinner className="size-8 text-primary" />
       </div>
     );
   }

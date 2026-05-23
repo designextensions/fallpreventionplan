@@ -22,7 +22,7 @@ function ModulesListContent() {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 bg-muted/30">
-        <Spinner size="lg" className="text-primary" />
+        <Spinner className="size-8 text-primary" />
       </div>
     );
   }
