@@ -28,7 +28,15 @@ import {
   Mic,
   ClipboardList,
   LifeBuoy,
+  Lock,
+  Clock,
 } from "lucide-react";
+
+function moduleImage(slug: string, w = 480, h = 320): string {
+  // picsum.photos returns a stable, deterministic stock photo per seed —
+  // perfect placeholder imagery for a prototype.
+  return `https://picsum.photos/seed/fpp-${slug}/${w}/${h}`;
+}
 
 export function Dashboard() {
   return (
@@ -82,6 +90,7 @@ function DashboardContent() {
     const available = plan.filter((m) => !m.locked && !m.comingSoon);
     const next = available[0] ?? plan[0] ?? null;
     return {
+      plan,
       totalInPlan: plan.length,
       availableCount: available.length,
       nextModule: next,
@@ -353,6 +362,110 @@ function DashboardContent() {
             </CardContent>
           </Card>
         </section>
+
+        {/* Complete 10-Point Plan gallery */}
+        {planStats && planStats.plan.length > 0 && (
+          <section className="mb-10" aria-labelledby="full-plan-heading">
+            <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
+              <div>
+                <h2
+                  id="full-plan-heading"
+                  className="font-serif text-2xl md:text-3xl font-bold text-primary mb-1"
+                >
+                  The complete 10-Point Plan
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  All ten modules — take them in order, at your own pace.
+                </p>
+              </div>
+              <Link
+                href="/modules"
+                className="text-primary font-bold hover:underline inline-flex items-center gap-2 text-lg min-h-[44px]"
+              >
+                View full program <ArrowRight className="w-5 h-5" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {planStats.plan.map((mod) => {
+                const isLocked = mod.locked || mod.comingSoon;
+                const isNext = !isLocked && mod.slug === planStats.nextModule?.slug;
+                const href = isLocked ? "/pricing" : `/modules/${mod.slug}`;
+                const shortTitle = mod.title.replace(/^Module \d+ — /, "");
+                return (
+                  <Link
+                    key={mod.slug}
+                    href={href}
+                    className={`group block rounded-xl overflow-hidden border bg-card shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary/30 ${
+                      isNext ? "border-primary border-2" : "border-border"
+                    }`}
+                    aria-label={`${mod.title}${isLocked ? " (locked)" : ""}`}
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                      <img
+                        src={moduleImage(mod.slug, 480, 360)}
+                        alt=""
+                        loading="lazy"
+                        className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                          isLocked ? "grayscale opacity-60" : ""
+                        }`}
+                      />
+                      <div className="absolute top-2 left-2 bg-white/95 rounded-full w-10 h-10 flex items-center justify-center font-serif font-bold text-primary text-lg shadow-sm">
+                        {mod.order}
+                      </div>
+                      {isNext && (
+                        <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-sm">
+                          Next
+                        </div>
+                      )}
+                      {isLocked && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <div className="bg-white rounded-full p-3 shadow-md">
+                            <Lock className="w-6 h-6 text-muted-foreground" aria-hidden="true" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-serif text-lg font-bold leading-snug mb-1">
+                        {shortTitle}
+                      </h3>
+                      {mod.subtitle && (
+                        <p className="text-sm text-muted-foreground leading-snug line-clamp-2 mb-3">
+                          {mod.subtitle}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-sm">
+                        {mod.durationMin ? (
+                          <span className="text-muted-foreground inline-flex items-center gap-1">
+                            <Clock className="w-4 h-4" aria-hidden="true" />
+                            {mod.durationMin} min
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <span
+                          className={`font-bold inline-flex items-center gap-1 ${
+                            isLocked ? "text-muted-foreground" : "text-primary"
+                          }`}
+                        >
+                          {isLocked ? (
+                            <>Unlock</>
+                          ) : (
+                            <>
+                              {isNext ? "Start" : "Open"}
+                              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Footer row: assessment status + help */}
         <section className="grid gap-6 md:grid-cols-2" aria-label="Quick links">
