@@ -22,7 +22,7 @@ import { Account } from "./pages/account/index";
 import { Checkout } from "./pages/account/checkout";
 import { Concierge } from "./pages/concierge";
 import { Admin } from "./pages/admin";
-import { AuthPage, SsoCallback } from "./pages/auth";
+import { AuthPage } from "./pages/auth";
 import NotFound from "./pages/not-found";
 import { Toaster } from "./components/ui/toaster";
 
@@ -165,7 +165,6 @@ function ClerkProviderWithRoutes() {
             <Route path="/" component={HomeRedirect} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
-            <Route path="/sso-callback" component={SsoCallback} />
             
             {/* Public Pages */}
             <Route path="/about" component={About} />
