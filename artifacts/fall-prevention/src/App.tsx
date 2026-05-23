@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk } from "@clerk/react";
+import { ClerkProvider, Show, useClerk } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
@@ -22,6 +22,7 @@ import { Account } from "./pages/account/index";
 import { Checkout } from "./pages/account/checkout";
 import { Concierge } from "./pages/concierge";
 import { Admin } from "./pages/admin";
+import { AuthPage, SsoCallback } from "./pages/auth";
 import NotFound from "./pages/not-found";
 import { Toaster } from "./components/ui/toaster";
 
@@ -84,19 +85,11 @@ const clerkAppearance = {
 };
 
 function SignInPage() {
-  return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-12">
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
-    </div>
-  );
+  return <AuthPage mode="signIn" />;
 }
 
 function SignUpPage() {
-  return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-12">
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
-    </div>
-  );
+  return <AuthPage mode="signUp" />;
 }
 
 function ClerkQueryClientCacheInvalidator() {
@@ -172,6 +165,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/" component={HomeRedirect} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
+            <Route path="/sso-callback" component={SsoCallback} />
             
             {/* Public Pages */}
             <Route path="/about" component={About} />
