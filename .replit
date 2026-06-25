@@ -17,7 +17,8 @@ expertMode = true
 
 [postMerge]
 path = "scripts/post-merge.sh"
-timeoutMs = 20000
+# install + schema push + content seed needs more headroom than the default
+timeoutMs = 120000
 
 [[ports]]
 localPort = 8080

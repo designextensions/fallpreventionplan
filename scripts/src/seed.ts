@@ -1231,8 +1231,13 @@ const SEED_MEMBERS = [
   { email: "admin@fallpreventionplan.com", name: "Admin Demo", tier: "admin" },
 ];
 
+// CONTENT_ONLY seeds just the real program (modules) — used in production /
+// post-merge so a deploy gets Dr. Angell's content with no demo members,
+// sample classes, or fake billing. The full seed (demo data) is for local dev.
+const CONTENT_ONLY = process.env.SEED_CONTENT_ONLY === "1";
+
 async function main() {
-  console.log("Seeding modules...");
+  console.log(`Seeding modules${CONTENT_ONLY ? " (content-only)" : ""}...`);
   for (const m of MODULES) {
     await db
       .insert(modulesTable)
@@ -1253,6 +1258,11 @@ async function main() {
           printable: m.printable,
         },
       });
+  }
+
+  if (CONTENT_ONLY) {
+    console.log(`Done. Seeded ${MODULES.length} program modules (content-only).`);
+    return;
   }
 
   // Classes/library are demo data — only seed when empty so re-running the seed
