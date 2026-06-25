@@ -300,13 +300,13 @@ function DashboardContent() {
                     {planStats?.nextModule
                       ? planStats.nextModule.title
                       : assessment
-                      ? "Browse your library"
+                      ? "Start your Fall Prevention Plan"
                       : "Start with the Self-Assessment"}
                   </h2>
                   <p className="text-lg text-muted-foreground mb-6 max-w-xl">
                     {planStats?.nextModule?.subtitle ??
                       (assessment
-                        ? "Continue at your own pace — every session is recorded."
+                        ? "Your results are saved. Open the program and begin with the first step, at your own pace."
                         : "A short test and a few questions to set your baseline. Most people finish in under 10 minutes.")}
                   </p>
                   <div>
@@ -315,6 +315,13 @@ function DashboardContent() {
                         <Button className="min-h-[56px] rounded-full px-8 text-lg font-bold w-full sm:w-auto">
                           <PlayCircle className="w-5 h-5 mr-2" aria-hidden="true" />
                           Start this module
+                        </Button>
+                      </Link>
+                    ) : assessment ? (
+                      <Link href="/modules">
+                        <Button className="min-h-[56px] rounded-full px-8 text-lg font-bold w-full sm:w-auto">
+                          <PlayCircle className="w-5 h-5 mr-2" aria-hidden="true" />
+                          Go to the program
                         </Button>
                       </Link>
                     ) : (

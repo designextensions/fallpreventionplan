@@ -1255,14 +1255,26 @@ async function main() {
       });
   }
 
-  console.log("Seeding live sessions...");
-  for (const s of SESSIONS) {
-    await db.insert(liveSessionsTable).values(s as never);
+  // Classes/library are demo data — only seed when empty so re-running the seed
+  // (e.g. on production) never creates duplicates.
+  const existingSessions = await db.select().from(liveSessionsTable);
+  if (existingSessions.length === 0) {
+    console.log("Seeding live sessions...");
+    for (const s of SESSIONS) {
+      await db.insert(liveSessionsTable).values(s as never);
+    }
+  } else {
+    console.log(`Live sessions already present (${existingSessions.length}) — skipping.`);
   }
 
-  console.log("Seeding library items...");
-  for (const li of LIBRARY) {
-    await db.insert(libraryItemsTable).values(li as never);
+  const existingLibrary = await db.select().from(libraryItemsTable);
+  if (existingLibrary.length === 0) {
+    console.log("Seeding library items...");
+    for (const li of LIBRARY) {
+      await db.insert(libraryItemsTable).values(li as never);
+    }
+  } else {
+    console.log(`Library items already present (${existingLibrary.length}) — skipping.`);
   }
 
   console.log("Seeding demo members...");
@@ -1273,9 +1285,20 @@ async function main() {
       .onConflictDoNothing();
   }
 
-  console.log("Seeding sample invoices and concierge data...");
-  const allUsers = await db.select().from(usersTable);
-  for (const u of allUsers) {
+  // Sample invoices/concierge data — ONLY for the demo seed accounts (never real
+  // signups), and only when no invoices exist yet (idempotent).
+  const demoEmails = new Set(SEED_MEMBERS.map((m) => m.email));
+  const existingInvoices = await db.select().from(invoicesTable);
+  const demoUsers =
+    existingInvoices.length === 0
+      ? (await db.select().from(usersTable)).filter((u) => demoEmails.has(u.email))
+      : [];
+  if (existingInvoices.length === 0) {
+    console.log("Seeding sample invoices and concierge data...");
+  } else {
+    console.log("Invoices already present — skipping sample billing/concierge data.");
+  }
+  for (const u of demoUsers) {
     if (u.tier === "one_time") {
       await db.insert(invoicesTable).values({
         userId: u.id,
