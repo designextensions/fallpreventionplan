@@ -2,27 +2,15 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-const rawPort = process.env.PORT;
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+// PORT is only used by the dev/preview server, not by the production build, so
+// default it rather than throwing — that keeps `vite build` robust on Replit
+// regardless of when env vars are injected. Replit sets PORT for the dev service.
+const port = Number(process.env.PORT) || 5173;
 
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+// Public base path. Defaults to "/"; Replit sets BASE_PATH explicitly for the
+// web artifact. Defaulting (instead of throwing) keeps the build from failing.
+const basePath = process.env.BASE_PATH || "/";
 
 export default defineConfig({
   base: basePath,
@@ -52,12 +40,6 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
-    // Proxy API calls to the local Express API server in dev. The SPA fetches
-    // relative `/api/...` URLs; point them at the API port (default 5000,
-    // overridable via API_PROXY_TARGET).
-    proxy: {
-      "/api": process.env.API_PROXY_TARGET || "http://localhost:5000",
-    },
     fs: {
       strict: true,
     },

@@ -49,7 +49,16 @@ Enum lives in `openapi.yaml` (type `PlanSection`). Currently `intro | ten_point 
 - **Onboarding:** `src/pages/onboarding.tsx` (route `/onboarding`) — Geoff's 3 intro slides; sign-up routes here first (gated by `hasOnboarded()` / `fpp.onboarded`).
 - **Dashboard search:** the "type 'I need a walker'" feature is a client-side token search over module titles/subtitles (`dashboard.tsx`).
 - **Contrast:** light-mode tokens in `index.css` were darkened to meet WCAG AA (muted-foreground, secondary/sage, accent/terracotta, input/border, button-outline) and a global 3px `:focus-visible` ring added. Don't lighten these back without re-checking contrast.
-- **Local dev preview:** `.claude/launch.json` ("fpp-web", port 5174) runs Vite proxied to the API on 5050 for the Claude preview tool.
+
+## Hosting on Replit
+
+The app is deployed via Replit's multi-artifact "application" router (`.replit` → `deploymentTarget = "autoscale"`):
+
+- **Web artifact** (`artifacts/fall-prevention/.replit-artifact/artifact.toml`): builds with `vite build` and is served as STATIC files from `dist/public`, with an SPA rewrite of `/*` → `/index.html`. Served at `/`.
+- **API artifact** (`artifacts/api-server/.replit-artifact/artifact.toml`): builds with esbuild, runs `node dist/index.mjs` on port 8080, mounted at `/api`, health check `/api/healthz`.
+- The router composes them on one origin, so the SPA's relative `/api/...` calls work with no proxy or CORS in production. There is intentionally NO Express static-file serving — Replit serves the frontend.
+- `vite.config.ts` defaults `BASE_PATH` to `/` and `PORT` to a dev value so the production build never fails on a missing env var.
+- **Go-live needs:** set `DATABASE_URL` as a Replit secret (managed Postgres), then run `pnpm --filter @workspace/db run push` (schema) and `pnpm --filter @workspace/scripts run seed` (Geoff's content) once against the prod DB. `scripts/post-merge.sh` runs `db push` automatically when changes are merged into the workspace.
 
 ## Architecture decisions
 
