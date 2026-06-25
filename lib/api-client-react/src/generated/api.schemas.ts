@@ -87,8 +87,10 @@ export type PlanSection = typeof PlanSection[keyof typeof PlanSection];
 
 export const PlanSection = {
   intro: 'intro',
+  overview: 'overview',
+  assessment: 'assessment',
   ten_point: 'ten_point',
-  five_point: 'five_point',
+  fall_response: 'fall_response',
   appendix_a: 'appendix_a',
   appendix_b: 'appendix_b',
 } as const;

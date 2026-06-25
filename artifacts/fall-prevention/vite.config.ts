@@ -52,6 +52,12 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    // Proxy API calls to the local Express API server in dev. The SPA fetches
+    // relative `/api/...` URLs; point them at the API port (default 5000,
+    // overridable via API_PROXY_TARGET).
+    proxy: {
+      "/api": process.env.API_PROXY_TARGET || "http://localhost:5000",
+    },
     fs: {
       strict: true,
     },

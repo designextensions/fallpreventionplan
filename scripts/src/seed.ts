@@ -9,735 +9,1142 @@ import {
   conciergeCheckInsTable,
 } from "@workspace/db";
 
+// ---------------------------------------------------------------------------
+// CONTENT SOURCE OF TRUTH
+//
+// Every module below uses Dr. Geoff Angell's verbatim copy from
+// ../FPP-CONTENT-REFERENCE.md (assembled 1:1 from his Word docs). His
+// "Thoughts/Ideas" notes in those docs are treated as build instructions:
+//   - videoEmbedUrl "placeholder:vimeo:<label>" marks a video slot he asked for
+//     (rendered as a labeled "Video coming soon" box until footage exists).
+//   - Inline `![<the image he described>]()` marks an image slot he asked for
+//     (rendered as a labeled "Image coming soon" box until artwork exists).
+//   - Tables and forms (medication list, nutrition tables) are real GFM tables.
+//
+// Section ordering is data-driven via `order` + `planSection`:
+//   intro -> overview -> assessment -> ten_point -> fall_response
+//        -> appendix_a -> appendix_b
+//
+// Note on tiers (business model from the brief, not Geoff's docs): the
+// Introduction, Overview, and Fall Self-Assessment are free previews
+// (freeTier: true); the paid program is gated.
+// Editorial note: only unambiguous spelling typos in the source were corrected
+// (e.g. "soul" -> "sole"); no clinical content, numbers, or wording was changed.
+// ---------------------------------------------------------------------------
+
 const MODULES = [
+  // ===== INTRODUCTION =====
   {
-    slug: "intro-orientation",
-    title: "Welcome & Orientation",
-    subtitle: "How this program works and how to use it",
-    order: 0,
+    slug: "introduction",
+    title: "Introduction",
+    subtitle: "Why falls happen — and why most are preventable",
+    order: 1,
     planSection: "intro",
-    durationMin: 8,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## Welcome
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `## Introduction
 
-Falls are the leading cause of injury for adults over 65 in the United States — but the great majority of falls are preventable. This program is built around a simple promise: small, consistent changes in four areas (movement, vision, medications, and home environment) can meaningfully lower your risk in a matter of weeks.
+Falling is one of the greatest risks faced by older adults today. They can lead to diminished balance confidence, decreased participation in daily activity, nursing home placement, serious injury and even death. Sadly, falls are alarmingly common and frequently hazardous — CDC statistics show that they are the leading cause of injury and injury-related death among seniors in the United States, with roughly 14 million falls, over 5 million injuries, and 34,000 deaths reported annually. Needless to say, falling is a very serious problem and these statistics could make one question if anything can actually be done to prevent them. Fortunately, the answer is a resounding YES! Falls are treatable. They don't have to be an inevitable part of aging. Research shows that most falls are preventable and fall risk can be significantly reduced. How is this accomplished? Studies indicate that implementing a multifaceted strategy that combines targeted fall-prevention techniques with balance focused strengthening exercises and a well-designed balance program is the most effective way to prevent falls.
 
-This orientation walks you through how the program is organized, how long each module takes, and how to get the most out of the live sessions.
+## Getting Started
 
-## How to use the plan
+The Fall Prevention Plan was created for this purpose. It is the answer to increased fall risk. It is a simple, but thorough guide to create a personalized fall prevention strategy that incorporates targeted fall reduction techniques, strengthening exercises, and a personalized balance program. This plan is your roadmap to a safer life. It empowers you to significantly lower your chance of falling by helping to pinpoint key risk factors and then outlining the most effective strategies to address them.
 
-The 10-Point Plan is meant to be worked through in order, but you can revisit any module as often as you like. We recommend one module a week. Print the worksheets, do the exercises, and bring questions to the live group classes.
-
-## A note on safety
-
-If you have had a recent fall, are recovering from surgery, or have a medical condition that affects balance, please talk with your doctor before starting any new exercise routine.`,
+To make the most of the program, review each section carefully, reflecting on how the recommendations apply to you, and then commit to integrating them into your daily routine. By doing so, you can enjoy a safer, more confident, and independent life.`,
     keyPoints: [
-      "Most falls are preventable — small, steady changes add up.",
-      "Work through the modules in order, one per week is ideal.",
-      "Bring questions to the live group sessions.",
+      "Most falls are preventable — falls are treatable and not an inevitable part of aging.",
+      "The most effective approach combines targeted fall-prevention techniques, strengthening exercises, and a well-designed balance program.",
+      "Review each section, reflect on how it applies to you, and build the recommendations into your daily routine.",
     ],
     comingSoon: false,
     freeTier: true,
     printable: true,
   },
+
+  // ===== OVERVIEW OF BALANCE AND FALLS =====
   {
-    slug: "module-1-understanding-fall-risk",
-    title: "Module 1 — Understanding Your Fall Risk",
-    subtitle: "The four main risk factors and what to do about each",
-    order: 1,
-    planSection: "ten_point",
-    durationMin: 22,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## What this module covers
-
-In this first module you will learn the four risk factors that account for the vast majority of falls in older adults, how each one contributes, and which ones you can change. This is the foundation everything else in the plan is built on.
-
-### 1. Movement and balance
-
-Strength, flexibility, and balance all decline gradually with age — but they respond beautifully to practice at any age. Even short, simple routines done two or three times a week measurably reduce fall risk within six to eight weeks.
-
-### 2. Vision
-
-Poor vision is one of the most under-recognized contributors to falls. Bifocals and progressives, in particular, can distort your perception of stairs and curbs. Annual eye exams matter.
-
-### 3. Medications
-
-Many common medications — including some prescribed for blood pressure, sleep, anxiety, and pain — can cause dizziness or unsteadiness, especially in combination. A medication review with your pharmacist is one of the highest-leverage things you can do.
-
-### 4. Home environment
-
-The home is where most falls happen. Loose rugs, poor lighting, missing grab bars, and clutter are common culprits. Module 8 covers a full room-by-room walkthrough.
-
-## Your homework for this module
-
-1. Take the Fall Risk Self-Assessment if you have not already.
-2. Note which of the four areas you scored highest in. That is where your plan starts.
-3. Bring your top concern to the next live Q&A session.
-
-## Printable
-
-A one-page summary of this module is available to download below.`,
-    keyPoints: [
-      "Four risk factors cause most falls: movement, vision, medications, home environment.",
-      "All four are modifiable — none are inevitable.",
-      "Start with the area where you scored highest in the self-assessment.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-2-balance-foundations",
-    title: "Module 2 — Balance Foundations",
-    subtitle: "Daily five-minute practice",
+    slug: "overview-balance-and-falls",
+    title: "An Overview of Balance and Falls",
+    subtitle: "What a fall is, what balance is, and how your body creates it",
     order: 2,
-    planSection: "ten_point",
-    durationMin: 18,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## Why balance is trainable at any age
+    planSection: "overview",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `Before starting your journey to reduce fall risk, it's helpful to have a basic understanding of balance and falls — what they are, how balance is created, and what causes falls to occur. Once knowledgeable of these subjects, you are in a good position to consider what specific factors increase your risk of falling and then to determine how likely you are to suffer a fall. Let's begin looking at this now.
 
-Balance is not a fixed trait. It is a skill, and like any skill it improves with practice — even into the ninth and tenth decades of life. The research here is unusually clear: adults who practice simple balance work for as little as five minutes a day, most days of the week, cut their fall risk by roughly a third within three months.
+## What is a Fall?
 
-The reason is that balance is really three systems working together: your inner ear (vestibular), your eyes, and the sensors in your feet, ankles, and joints (proprioception). When any one of those weakens, the others can be trained to compensate. That is what this module's daily practice is designed to do.
+A fall is an unexpected event where the body comes to rest on the ground, with or without injury.
 
-### The five-minute foundation routine
+![Someone falling — can be cartoonish]()
 
-Do this every day, ideally at the same time — many members find right after breakfast works best because you are already up and moving. Stand near a sturdy counter or the back of a heavy chair so you have something to hold if you need it.
+## What is Balance?
 
-1. **Heel-to-toe stand (30 seconds each side).** Place one foot directly in front of the other, heel touching toe. Hold. Switch which foot is in front.
-2. **Single-leg stand (15–30 seconds each side).** Lift one foot just an inch off the floor. Build up over weeks.
-3. **Heel raises (10 repetitions).** Rise up onto the balls of your feet, then lower slowly.
-4. **Sideways walking (10 steps each direction).** Step sideways along your counter, controlled and slow.
-5. **Sit-to-stand (5 repetitions).** From a sturdy chair, stand up without using your hands if you can. Sit back down with control.
+Balance is the act of maintaining physical stability and the body's primary defense against falling.
 
-The whole routine takes five to seven minutes. Done daily, it is the single most effective habit in the entire program.
+![Someone balancing — can be a cartoon, e.g. a tightrope walker]()
 
-## Progressing safely
+## How is balance created?
 
-Begin with one hand on the counter. After a week or two, try one finger. After another week or two, try hands hovering above the counter but not touching. Only progress when the current level feels easy.
+Balance is created through a complex sequence of events involving multiple body systems working together to create a stable body position. The process is automatic, subconscious, nearly instantaneous, and looks something like this:
 
-## Common mistakes
+The body's sensory systems gather data about its position and movement relative to the surrounding environment. This information is sent to the brain and spinal cord where it is analyzed and a plan to maintain balance is created. The newly formulated instructions are then sent to the muscles to carry out the movements used to maintain a stable body position and avoid falling.
 
-The two most common mistakes are rushing the movements and holding your breath. Slow is strong. Breathe normally throughout.
-
-## Homework
-
-Print the tracking sheet below and check off the routine each day for the next seven days. Bring your sheet to the next live class.`,
+![Sequence schematic: stimulus touches the body → message travels to the spinal cord and/or brain → a plan is created → message travels back to the body → the body carries out a response movement]()`,
     keyPoints: [
-      "Five minutes a day, most days, measurably reduces fall risk within three months.",
-      "Always practice near a sturdy counter or chair you can grab if needed.",
-      "Progress by reducing support (full hand → one finger → hover), not by going faster.",
-      "Slow, controlled movements build more balance than quick ones.",
-      "Track your daily practice — consistency matters more than duration.",
+      "A fall is an unexpected event where the body comes to rest on the ground, with or without injury.",
+      "Balance is the act of maintaining physical stability and the body's primary defense against falling.",
+      "Balance is created automatically: the senses gather data, the brain and spinal cord form a plan, and the muscles carry it out.",
     ],
     comingSoon: false,
-    freeTier: false,
+    freeTier: true,
     printable: true,
   },
+
+  // ===== FALL SELF-ASSESSMENT =====
   {
-    slug: "module-3-strength",
-    title: "Module 3 — Building Lower-Body Strength",
-    subtitle: "Sit-to-stand, calf raises, and the wall squat",
+    slug: "fall-self-assessment",
+    title: "Fall Self-Assessment",
+    subtitle: "What causes falls, and how likely you are to fall",
     order: 3,
-    planSection: "ten_point",
-    durationMin: 20,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## Why lower-body strength matters more than you think
+    planSection: "assessment",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:Demonstration of how to perform the TUG (Timed Up and Go) Test",
+    body: `## What causes falls?
 
-After age 60, adults lose roughly 1–2% of their muscle mass per year if they do not actively work to maintain it. The legs and hips lose strength even faster. This is the single biggest factor in whether a stumble becomes a fall, and whether a fall becomes a hospital stay.
+Falls happen when the body becomes unsteady and any attempt it makes to regain a balanced position fails. The body can become unsteady and fall for a variety of reasons. The most common causes include:
 
-The good news is that lower-body strength responds to training faster than almost any other physical quality. Members in their 70s and 80s routinely double their leg strength in 10–12 weeks of consistent practice. You do not need a gym, weights, or special equipment.
+- Muscle or joint stiffness
+- Poor endurance
+- Muscle weakness
+- Reduced sensation
+- Poor balance
+- Dizziness
+- Altered posture
+- Low vision
+- Pain
+- Impulsive movements
+- Abnormal walking patterns
+- Decreased cognition
+- Limited safety awareness
+- Low acceptance of disability
+- Reduced short-term memory
+- Incontinence
+- Polypharmacy (multiple medications)
+- Adverse medication side effects
+- Poor fluid intake
+- Inadequate nutrition
+- Poorly fitting footwear
+- Improperly prescribed or fitted mobility devices
+- Assistive device non-use
+- Cluttered home environment
+- Poor lighting
+- Unsafe/unlevel terrain
+- Lack of appropriate medical equipment in high-risk areas (e.g., shower, toilet, etc…)
 
-### The three foundation exercises
+![A banana peel, or a picture of multiple different fall catalysts]()
 
-These three movements, done two or three times a week, cover the major muscle groups that protect you from falls.
+**A key point.** As you can now see, there are many factors that can cause unsteadiness, however understanding what causes your own unsteadiness is the key to improving your safety. This pinpoints the most likely reason you might fall and therefore begins creating the framework for an effective fall prevention plan.
 
-**1. Sit-to-stand (the king of all exercises).** From a sturdy chair, stand up without using your hands, then sit back down with control. Start with 5 repetitions. Build to 3 sets of 10 over six weeks. If standing without hands is too hard, use one hand on the chair arm and progress from there.
+**Question:** Did you recognize anything in the list above that might cause you to become unsteady and fall?
 
-**2. Calf raises.** Standing behind a chair with light fingertip support, rise up onto the balls of your feet, hold for one second, then lower slowly over a count of three. Do 10 repetitions. Build to 3 sets of 15.
+## Determining Fall Risk
 
-**3. Wall squat.** Stand with your back flat against a wall, feet about a foot in front of you, shoulder-width apart. Slide down the wall until your knees are bent about 30 degrees (do not go deeper than 90 degrees). Hold for 10 seconds, then slide back up. Build the hold to 30 seconds over six weeks.
+Knowing how likely you are to fall is also very important to understand when creating a fall prevention plan. This information helps to select the strategies that will be most effective in reducing your chance of falling.
 
-## How to progress safely
+A tool that can be used to assess fall risk is the Timed Up and Go Test, or TUG Test. It is performed by measuring how long it takes to stand from a chair, walk ten feet, turn around, walk back, and sit down. The results of the test are then compared to standard data to make an estimate of fall risk.
 
-Strength training should feel challenging by the last two or three repetitions of each set, but never painful. Mild muscle soreness the next day is normal and good. Sharp pain, especially in joints, is a signal to back off and check with your doctor or physical therapist.
+**To perform the TUG Test:**
 
-Rest at least one day between strength sessions. Your muscles get stronger during recovery, not during the workout itself.
+1. Place a sturdy chair in an open area.
+2. Mark a line ten feet from the chair.
+3. Time yourself as you stand, walk to the line at a normal pace, turn, walk back, and sit down.
 
-## What about weights?
+**To score the TUG Test and estimate fall risk:**
 
-You do not need them to get the benefits in this module. If you want to add resistance later, the simplest option is a small backpack with a couple of cans of soup. Start with two pounds and add a pound every couple of weeks.
+Compare the time it took to complete the test to the following standard data to provide an estimate of fall risk:
 
-## Homework
+| Time to Complete Test | Fall Risk |
+| --- | --- |
+| Less than 10 seconds | Low fall risk |
+| 10–14.9 seconds | Moderate fall risk |
+| Greater than 15 seconds | High fall risk |
 
-Pick three days this week — Monday/Wednesday/Friday is a popular pattern — and do all three exercises. Track your sets and reps on the worksheet below.`,
+Go ahead and try the TUG Test. How did you do?
+
+**[Take your interactive Fall Self-Assessment →](/assessment)** — we'll time the TUG Test with you, walk through the risk-factor list above, and estimate your fall risk.`,
     keyPoints: [
-      "Lower-body strength loss is the biggest predictor of serious falls — and the most reversible.",
-      "Three exercises (sit-to-stand, calf raises, wall squat) cover the muscles that matter most.",
-      "Train two or three days per week, with at least one rest day between sessions.",
-      "Progress by adding repetitions, not by going faster.",
-      "Mild soreness is fine; sharp joint pain is a stop sign.",
+      "Falls happen when the body becomes unsteady and cannot regain a balanced position.",
+      "Understanding the cause of your own unsteadiness is the key to improving your safety.",
+      "The Timed Up and Go (TUG) Test estimates fall risk: under 10 seconds is low, 10–14.9 is moderate, over 15 seconds is high.",
     ],
     comingSoon: false,
-    freeTier: false,
+    freeTier: true,
     printable: true,
   },
+
+  // ===== CREATING A PERSONALIZED FALL PREVENTION PLAN (intro) =====
   {
-    slug: "module-4-vision",
-    title: "Module 4 — Vision and Eyewear",
-    subtitle: "Why your glasses might be working against you",
-    order: 4,
-    planSection: "ten_point",
-    durationMin: 14,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## The vision–falls connection nobody talks about
-
-Roughly one in three adults over 65 has a vision problem that contributes to their fall risk, and most of them do not know it. The culprit is rarely going blind. It is far more often a subtle change — depth perception, contrast sensitivity, or the way your glasses distort what is right in front of your feet.
-
-### The bifocal and progressive lens problem
-
-Bifocals and progressive (no-line) lenses are wonderful for reading and seeing far away — but they cause a specific problem when you look down at stairs or curbs. The lower portion of the lens is calibrated for reading distance (about 14 inches), which means everything four to six feet away — exactly where the next stair is — appears blurred and distorted.
-
-The research on this is sobering: people who wear progressives outside the home have roughly double the fall risk on stairs compared to those who use single-vision distance glasses for walking.
-
-### The two-glasses solution
-
-The single most effective change you can make in this module is to own two pairs of glasses:
-
-1. **Single-vision distance glasses** for walking, especially outdoors and on stairs.
-2. **Your usual bifocals or progressives** for everything else — reading, cooking, the computer.
-
-It is a small habit change. The impact on fall risk is large.
-
-## Other vision factors that matter
-
-**Annual eye exams.** Cataracts, glaucoma, and macular degeneration all develop gradually and silently. A yearly comprehensive exam (not just a vision screening) catches them early.
-
-**Lighting at home.** Module 8 covers this in depth, but the headline is: your eyes need three times as much light at age 70 as they did at 30. Stairwells and hallways are the highest-priority places to improve.
-
-**Contrast.** Putting a strip of brightly colored tape on the edge of each step makes them dramatically easier to see, especially in low light.
-
-## Homework
-
-1. If you wear bifocals or progressives, schedule an appointment to get a single-vision distance pair.
-2. If your last comprehensive eye exam was more than a year ago, schedule one this week.
-3. Walk through your home with the lights on as they normally are. Note the three darkest spots and plan to add lighting.`,
-    keyPoints: [
-      "Progressive and bifocal lenses double fall risk on stairs.",
-      "Own a separate single-vision distance pair for walking, especially outdoors.",
-      "Get a comprehensive eye exam every year — screenings are not enough.",
-      "Adults over 70 need roughly 3× as much light as they did at 30.",
-      "Bright tape on stair edges is a cheap, high-impact change.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-5-medications",
-    title: "Module 5 — The Medication Review",
-    subtitle: "A conversation with your pharmacist",
-    order: 5,
-    planSection: "ten_point",
-    durationMin: 16,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## Medications: the most overlooked fall risk
-
-If we could change just one thing about how older adults are cared for in this country, it would be this: every adult over 65 should have a comprehensive medication review with a pharmacist at least once a year. The evidence is overwhelming. Medication review alone reduces fall risk by 20–40% in people taking four or more daily medications.
-
-The reason is simple. Most people accumulate medications over the years — a sleep aid here, a blood pressure pill there, an anti-anxiety prescription from a few years back that nobody ever stopped. Each was reasonable on its own. Together, they can quietly cause the dizziness, lightheadedness, or daytime drowsiness that leads to a fall.
-
-### High-risk medication categories
-
-These categories are most strongly linked to falls in older adults. If you take any of them, the medication review below is especially important.
-
-- **Sleep aids and sedatives** (zolpidem, eszopiclone, benzodiazepines like lorazepam or diazepam)
-- **Anti-anxiety medications** (especially long-acting benzodiazepines)
-- **Some antidepressants** (particularly older tricyclics)
-- **Blood pressure medications** (especially when first started or after a dose change)
-- **Diuretics ("water pills")** which can cause dehydration and dizziness
-- **Opioid pain medications**
-- **Some over-the-counter antihistamines** (diphenhydramine / Benadryl, in particular)
-- **Anticholinergics** (some bladder medications, muscle relaxants)
-
-A single medication in any of these categories may be entirely appropriate. The risk grows quickly when several are combined.
-
-### How to prepare for the conversation
-
-Bring **everything**, including over-the-counter products and supplements. Many pharmacists call this the "brown bag review" — literally bring a bag with every bottle in it.
-
-Questions to ask:
-
-1. Is each of these medications still needed? When was it last reviewed?
-2. Are any of these on the **Beers Criteria** list of medications considered high-risk for older adults?
-3. Could any of these interact with each other to cause dizziness, drowsiness, or low blood pressure?
-4. Are there safer alternatives for any of them?
-5. Could any be taken at a different time of day to reduce the chance of falling at night?
-
-## A note on stopping medications safely
-
-Never stop a prescription medication on your own. Some require gradual tapering. The point of this module is to start the conversation with your pharmacist and prescribing doctor — not to make changes without them.
-
-## Homework
-
-1. Make a list of every medication and supplement you take, with the dose and time of day.
-2. Schedule a brown-bag review with your pharmacist this month.
-3. After the review, share any recommended changes with your primary care doctor.`,
-    keyPoints: [
-      "Medication review reduces fall risk by 20–40% in people on four or more daily medications.",
-      "Sleep aids, sedatives, blood pressure pills, and diuretics are the highest-risk categories.",
-      "Bring every bottle — prescription, OTC, and supplements — to a 'brown bag' pharmacist review.",
-      "Ask whether any of your medications are on the Beers Criteria list.",
-      "Never stop a prescription on your own; some require gradual tapering.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-6-footwear",
-    title: "Module 6 — Footwear That Works",
-    subtitle: "What to look for, what to throw out",
-    order: 6,
-    planSection: "ten_point",
-    durationMin: 12,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## Your shoes matter more than you think
-
-A surprising amount of fall research has focused on footwear, and the findings are consistent: the wrong shoes roughly double your fall risk, and the right ones can cut indoor falls nearly in half. Most people never get advice about this from their doctor.
-
-### What makes a fall-safe shoe
-
-The ideal shoe for an older adult has five features:
-
-1. **A firm, thin sole.** Soft, cushy soles feel comfortable but reduce the feedback your feet need to sense the ground. A firmer sole helps you feel where you are.
-2. **A low, broad heel.** Less than one inch, with a wide base. High or narrow heels shift your center of gravity and make ankle sprains far more likely.
-3. **A non-slip tread.** Look for visible grooves on the sole, similar to a tire. Smooth leather soles are notoriously slippery on tile and polished wood.
-4. **A secure fastening.** Laces, Velcro straps, or buckles that actually hold the shoe onto your foot. Slip-ons that flop around at the heel are a common fall trigger.
-5. **A snug fit at the heel and a roomy fit at the toes.** Toes should not be cramped, but the heel must not slip up and down as you walk.
-
-### What to throw out (or only wear sitting down)
-
-- Backless slippers and slides
-- Smooth-soled dress shoes
-- High heels of any kind
-- Shoes whose soles have gone smooth from wear
-- Flip-flops and "barefoot" sandals
-- Loose house slippers without a back
-
-### What about going barefoot at home?
-
-This one surprises people. Walking barefoot or in socks-only on hardwood, tile, or linoleum is one of the most common settings for indoor falls. Either wear a proper indoor shoe with a non-slip sole, or use non-slip socks with rubber dots on the bottom.
-
-## When to replace shoes
-
-Look at the sole. When the tread is worn smooth, the shoe is done — even if the upper still looks fine. For most daily-wear shoes, that is 9 to 12 months.
-
-## Homework
-
-1. Walk through your closet and apply the five-feature checklist to every pair of shoes.
-2. Identify your one best pair for indoors and your one best pair for outdoors.
-3. Replace or retire any pair that fails the checklist.`,
-    keyPoints: [
-      "Look for five features: firm thin sole, low broad heel, non-slip tread, secure fastening, snug heel.",
-      "Backless slippers and smooth-soled dress shoes are the most common offenders.",
-      "Walking barefoot or in socks on hardwood and tile is a major indoor fall risk.",
-      "Replace shoes when the sole tread wears smooth — usually every 9–12 months.",
-      "Audit your closet today; even one good change makes a measurable difference.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-7-nutrition",
-    title: "Module 7 — Nutrition for Bone and Muscle",
-    subtitle: "Protein, vitamin D, and hydration",
-    order: 7,
-    planSection: "ten_point",
-    durationMin: 15,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## Why nutrition belongs in a fall-prevention program
-
-Two of the biggest predictors of a serious fall injury are sarcopenia (age-related muscle loss) and osteoporosis (low bone density). Both are powerfully influenced by what you eat and drink, and the changes that help are surprisingly simple.
-
-### Protein: the underrated nutrient
-
-Most older adults eat too little protein. The old guidelines suggested about 0.8 grams per kilogram of body weight per day; current research on healthy aging suggests 1.0 to 1.2 grams. For a 150-pound person, that is roughly 75 to 85 grams a day.
-
-Just as important: **spread your protein across the day**. The body can only build muscle from about 25–30 grams of protein at a time. A typical American pattern — light breakfast, light lunch, big dinner — wastes most of the dinner protein. Aim for 20–30 grams at each of three meals.
-
-Good sources: Greek yogurt, eggs, cottage cheese, fish, chicken, beans and lentils, tofu, milk, and a scoop of protein powder in a smoothie if you need a quick boost.
-
-### Vitamin D and calcium
-
-Vitamin D helps your body absorb calcium and is also linked directly to muscle function. Many older adults are mildly deficient, especially through the winter and especially if they spend most of their time indoors. A simple blood test will tell you where you stand. Most adults over 65 do well with 800–1,000 IU per day from food or a supplement — but talk to your doctor about the right level for you.
-
-Calcium needs go up after age 50, to about 1,200 mg per day. Dairy is the easiest source; if you do not tolerate dairy, fortified plant milks, sardines, canned salmon with bones, tofu, and leafy greens all contribute.
-
-### Hydration: the simplest fix
-
-Mild dehydration causes dizziness on standing — the medical term is orthostatic hypotension — and is one of the most common preventable triggers of falls. Older adults feel thirst less reliably, so you cannot wait until you feel thirsty.
-
-A simple rule: drink a full glass of water with every meal, and another one mid-morning and mid-afternoon. That is six glasses a day, before counting tea, coffee, or anything else. If you take a diuretic, your doctor may want you to aim slightly differently — ask.
-
-## Homework
-
-1. Track your protein for two days. If you are under 75 grams a day, plan one specific change.
-2. If you have not had a vitamin D level checked in the last year, ask your doctor at your next visit.
-3. Set up a visible water reminder — a marked bottle on the counter works well.`,
-    keyPoints: [
-      "Aim for 1.0–1.2 grams of protein per kilogram of body weight per day, spread across three meals.",
-      "Vitamin D supports both calcium absorption and muscle function; ask your doctor about a blood test.",
-      "Calcium needs rise to 1,200 mg per day after age 50.",
-      "Mild dehydration is a major hidden trigger of dizziness and falls.",
-      "Drink a glass of water with every meal plus mid-morning and mid-afternoon, without waiting for thirst.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-8-home-walkthrough",
-    title: "Module 8 — Room-by-Room Home Walkthrough",
-    subtitle: "Bathroom, bedroom, stairs, kitchen",
-    order: 8,
-    planSection: "ten_point",
-    durationMin: 28,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## The most important module in the program
-
-More than half of all falls in adults over 65 happen at home, and the great majority of those happen in just four rooms: the bathroom, the bedroom, the stairway, and the kitchen. This module is a guided walkthrough of each one. Print the checklist below and do it with a family member if you can — a second pair of eyes catches what your own eyes have learned to ignore.
-
-### The bathroom
-
-The bathroom causes more serious injuries per square foot than any other room in the house. The combination of hard surfaces, water, and the act of standing up from a low toilet is uniquely hazardous.
-
-- **Grab bars** beside the toilet and inside the shower or tub. Suction-cup bars are not safe — bars must be screwed into wall studs or use specialized hollow-wall anchors.
-- **Non-slip mat** inside the tub or shower. Replace it when the suction stops gripping.
-- **Raised toilet seat** if you find yourself pushing off the walls or counter to stand up.
-- **Walk-in shower** if you are renovating. Stepping over a tub edge is a top-three indoor fall trigger.
-- **A nightlight** in the bathroom for the inevitable middle-of-the-night trip.
-
-### The bedroom
-
-- **A clear path** from bed to bathroom with no rugs, cords, or shoes to step around.
-- **A nightlight or motion-activated light** along that path.
-- **A sturdy lamp** within easy reach of the bed — not a touch-lamp that may not respond on the first try.
-- **Bed at the right height.** You should be able to plant both feet flat on the floor while seated on the edge.
-- **Phone within reach** of the bed in case of a nighttime fall.
-
-### The stairs
-
-- **Sturdy handrails on both sides** of every staircase, inside and out.
-- **Even, well-lit treads.** Bright tape on the edge of each step helps enormously in low light.
-- **No clutter.** Nothing — not even a folded laundry basket — staged on the stairs to "take up later."
-- **Avoid carrying loads** that block your view of the next step. Make two trips.
-
-### The kitchen
-
-- **Everyday items on shelves between waist and shoulder height.** No standing on a chair or step stool for the coffee mugs.
-- **A sturdy, two-step kitchen ladder with a high handrail** for the rare reach to high shelves. Never a chair.
-- **Spills mopped immediately.**
-- **A rubber-backed mat** in front of the sink if you spend long periods standing there.
-
-### Hallways and living areas
-
-- **Throw rugs:** the simplest rule is to remove them. If you cannot, use double-sided rug tape to anchor every edge.
-- **Cords:** never run them across walkways. Tape them to baseboards or run them behind furniture.
-- **Lighting:** 60-watt-equivalent bulbs minimum in any room you walk through at night.
-
-## Homework
-
-Print the checklist below and walk through your home in one sitting. Mark every item as fixed, in progress, or needs help. Bring the list to your next live class or concierge call.`,
-    keyPoints: [
-      "More than half of all falls happen at home — and most are preventable with small changes.",
-      "Bathroom, bedroom, stairs, and kitchen account for the great majority of home falls.",
-      "Grab bars and handrails must be anchored into studs — suction-cup bars are not safe.",
-      "Throw rugs are the single most common indoor trip hazard; remove them if possible.",
-      "Do the walkthrough with a second pair of eyes — a family member sees what you no longer notice.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-9-getting-up",
-    title: "Module 9 — How to Get Up After a Fall",
-    subtitle: "The technique everyone should practice once",
-    order: 9,
-    planSection: "ten_point",
-    durationMin: 11,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## A skill worth practicing before you need it
-
-Even with the best prevention plan, falls sometimes happen. What separates a fall that becomes a frightening hour on the floor from one that becomes a brief inconvenience is whether you have ever practiced getting back up. Most people have not. This module fixes that.
-
-Important note: please practice this with another person present, on a carpeted floor or with a thick mat down. If you have hip, knee, or shoulder problems, talk with a physical therapist about whether and how to practice.
-
-### Step 1: Pause and assess
-
-Do not rush. Lie still for a moment and take a few breaths. Ask yourself: am I hurt? Can I move my arms and legs? If there is sharp pain, especially in a hip, do not try to get up. Call for help or use your phone or medical alert.
-
-### Step 2: Roll onto your side
-
-Slowly roll onto whichever side feels easier. Bend your top knee and reach your top arm across your body to help the roll.
-
-### Step 3: Push up to your hands and knees
-
-From your side, push yourself up onto your hands and knees. Take your time.
-
-### Step 4: Crawl to a sturdy piece of furniture
-
-Move to a heavy chair, sofa, or low bed — something that will not tip when you put weight on it.
-
-### Step 5: Hands on the seat, one knee up
-
-Put both hands flat on the seat of the chair. Bring your stronger leg forward and place that foot flat on the floor, with the knee bent. Your other knee stays down.
-
-### Step 6: Push up and pivot
-
-Push down through both hands and the forward foot to rise up. Pivot your hips and sit down on the chair. Sit for several minutes before trying to stand up and walk.
-
-## When to call for help instead
-
-- If you feel any sharp pain, especially in a hip, shoulder, or back.
-- If you feel dizzy, confused, or short of breath.
-- If you hit your head, even if you feel fine — this needs medical attention, especially if you take a blood thinner.
-- If you cannot get into the position to push up.
-
-A medical alert pendant or a phone kept on you at all times is a reasonable precaution for anyone living alone.
-
-## Homework
-
-Practice this once with a family member or in your next live class. The first time is awkward. By the third time most people feel surprisingly capable.`,
-    keyPoints: [
-      "Practice the get-up technique before you ever need it — most people never do.",
-      "Always pause first to check for injury before trying to move.",
-      "Roll to your side, then to hands and knees, then crawl to a sturdy chair.",
-      "Sharp pain, dizziness, or a head hit means stop and call for help.",
-      "Keep a phone or medical alert on your person, especially if you live alone.",
-    ],
-    comingSoon: false,
-    freeTier: false,
-    printable: true,
-  },
-  {
-    slug: "module-10-staying-the-course",
-    title: "Module 10 — Staying the Course",
-    subtitle: "Habits, routines, and asking for help",
+    slug: "personalized-plan-intro",
+    title: "Creating a Personalized Fall Prevention Plan",
+    subtitle: "The 10 areas your plan will address",
     order: 10,
     planSection: "ten_point",
-    durationMin: 17,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## The hardest part is week six
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `Now that you have a basic understanding of balance and falls, have identified your fall risk factors, and estimated how likely you are to fall, you're ready to tackle the problem of increased fall risk by creating a personalized Fall Prevention Plan.
 
-Most fall-prevention programs work — when people stick with them. The challenge is rarely understanding what to do. It is doing it consistently after the early enthusiasm fades. This module is about the habits and supports that keep the plan going through month two, month six, and year two.
+To do this, you will be introduced to the 10 most common areas related to falls and the best strategies known to prevent them. The areas to be discussed include:
 
-### Anchor each new habit to an existing one
+1. Mindset
+2. Footwear
+3. Vision
+4. Medication
+5. Nutrition and Hydration
+6. Posture
+7. Home Safety
+8. Assistive Device Selection
+9. Strength
+10. Balance
 
-The single most reliable trick in behavior research is called **habit stacking**. You attach a new habit to something you already do every day, in the same place, at the same time.
+As you explore the 10 Step Plan to reduce the risk of falls, take time to understand each problem area and the suggested solutions. Then determine the fall prevention strategies that would help you the most and begin working to incorporate them into your daily routine.
 
-Examples that members find work:
-
-- Balance exercises right after brushing teeth in the morning.
-- Strength routine on Monday, Wednesday, and Friday before lunch.
-- A full glass of water with each of the day's medications.
-- A weekly Sunday-evening home safety walk-through (5 minutes is enough).
-
-Do not try to install all of these at once. Pick one. Get it solid for two weeks. Then add the next.
-
-### Make it social
-
-People who do the program with a partner — a spouse, an adult child, a friend, or a small group from the live classes — stick with it dramatically longer. If you can, find one person to text once a week with "did the exercises three times this week, what about you?"
-
-The live classes and Q&A sessions exist for exactly this reason. Showing up matters even when you do not have a question.
-
-### Tracking that does not become a chore
-
-A simple wall calendar with a checkmark for each day you do your routine is enough. Forget the apps. Forget the spreadsheets. The visible streak is the motivator.
-
-### What to do when you slip
-
-Everyone has weeks where the routine falls apart — a cold, a holiday, family visiting from out of town. The research is clear: a one-week lapse does not undo months of progress, and the people who get back on track within two weeks lose almost nothing.
-
-The trick is to plan for the restart before the lapse ends. Pick the exact day and the exact first session. Tell someone. Show up.
-
-### Asking for help is part of the plan
-
-If you live alone, if you have had a recent fall, or if you are caring for a spouse, the concierge program exists for you. So do family members, neighbors, your faith community, and your primary care doctor. The most successful members of this program are not the ones who need the least help. They are the ones who ask for it earliest.
-
-## Homework
-
-1. Pick one habit from this module to anchor to something you already do daily.
-2. Identify one person you will check in with weekly.
-3. Put a wall calendar somewhere visible and start the streak.`,
+The Fall Prevention Plan isn't a one-time task, instead it's a guide for a safety-focused lifestyle. Stay consistent with its recommendations and you'll significantly reduce your risk of falls!`,
     keyPoints: [
-      "Anchor new habits to existing daily routines — this is the most reliable behavior-change trick.",
-      "Add habits one at a time. Two weeks per habit before adding the next.",
-      "People who do the program with a partner stick with it dramatically longer.",
-      "A one-week lapse does not undo months of progress — plan your restart in advance.",
-      "Asking for help early is a feature of the plan, not a failure of it.",
+      "Your plan addresses the 10 most common areas related to falls: mindset, footwear, vision, medication, nutrition and hydration, posture, home safety, assistive devices, strength, and balance.",
+      "Understand each problem area, then choose the strategies that would help you the most and build them into your routine.",
+      "The Fall Prevention Plan is a safety-focused lifestyle, not a one-time task — consistency is what reduces your risk.",
     ],
     comingSoon: false,
     freeTier: false,
     printable: true,
   },
+
+  // ----- Step 1: Mindset -----
   {
-    slug: "five-point-quickstart",
-    title: "5-Point Quick Start",
-    subtitle: "The short version when you only have one afternoon",
+    slug: "step-1-mindset",
+    title: "Step 1: Mindset",
+    subtitle: "Choosing to be safe",
+    order: 11,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The first step in the Fall Prevention Plan is adopting a safety-first mindset, that is, making a conscious decision to prioritize not falling. In essence, "choosing to be safe."
+
+How is this accomplished?
+
+1. Acknowledge your increased fall risk.
+2. Stay alert to factors that could worsen your risk of falling.
+3. Commit to using strategies that lower your chances of falling.
+
+Being intentional about safety is key to preventing falls and the foundation of an effective Fall Prevention Plan.
+
+**To decrease your risk of falls, choose to be safe!**
+
+![Someone deep in thought, or the "Thinker" sculpture]()`,
+    keyPoints: [
+      "A safety-first mindset means making a conscious decision to prioritize not falling.",
+      "Acknowledge your risk, stay alert to what worsens it, and commit to strategies that lower it.",
+      "To decrease your risk of falls, choose to be safe.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 2: Footwear -----
+  {
+    slug: "step-2-footwear",
+    title: "Step 2: Footwear",
+    subtitle: "Choosing the right shoes",
+    order: 12,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The second step in the Fall Prevention Plan is choosing the right footwear. Proper shoes play a key role in reducing fall risk and should be selected with that goal in mind. Shoes should enhance balance and minimize the chance of falling.
+
+![Illustration or cartoon of a shoe]()
+
+Brand doesn't matter, instead wear shoes that are comfortable, fit properly, have good arch support, a flat or low-pitched sole, a closed heel, a non-aggressive tread, and if able, the ability to be fastened securely.
+
+**Footwear Recommendation:** to reduce fall risk, stick to the following shoe styles:
+
+1. Walking shoe
+2. Properly fitted slip-on shoe
+3. Lace up dress shoe
+4. Sandal with fastening straps at the toe and heel
+
+![The recommended shoe styles]()
+
+One last tip: stay away from high heels, slip on shoes that lack a closed heel, sandals without a back strap, or running shoes.`,
+    keyPoints: [
+      "Choose shoes that are comfortable and fit properly, with good arch support, a flat or low-pitched sole, a closed heel, a non-aggressive tread, and a secure fastening.",
+      "Recommended styles: a walking shoe, a properly fitted slip-on, a lace-up dress shoe, or a sandal with straps at the toe and heel.",
+      "Stay away from high heels, slip-ons without a closed heel, sandals without a back strap, and running shoes.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 3: Vision -----
+  {
+    slug: "step-3-vision",
+    title: "Step 3: Vision",
+    subtitle: "Managing your vision",
+    order: 13,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The third step in the Fall Prevention Plan is properly managing your vision. Clear vision helps you navigate your surroundings and is therefore vital for maintaining balance. Unfortunately, visual acuity often deteriorates with age, and can, if left unaddressed, lead to increased fall risk.
+
+To reduce fall risk, prioritize eye health with these 5 steps:
+
+1. Get regular eye exams.
+2. Wear your prescribed eyewear.
+3. Follow your doctor's advice on vision medications and treatments.
+4. Acknowledge any visual impairments and adjust your routine or environment as needed (ensure adequate lighting throughout your home, don't walk outside or drive at night, and mark stair edges with contrasting tape, etc...).
+5. If multifocal lens glasses (bifocals, trifocals, or progressives) cause your vision to be distorted, consider having multiple sets of glasses. One pair for distance vision needs and another pair for close-up tasks.
+
+![An eye chart, glasses, and a pill bottle]()`,
+    keyPoints: [
+      "Get regular eye exams and wear your prescribed eyewear.",
+      "Follow your doctor's advice on vision medications and treatments.",
+      "Adjust for visual impairments: improve home lighting, avoid walking or driving at night, and mark stair edges with contrasting tape.",
+      "If multifocal lenses distort your vision, consider separate pairs for distance and close-up tasks.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 4: Medication -----
+  {
+    slug: "step-4-medication",
+    title: "Step 4: Medication and Balance",
+    subtitle: "Managing your medications",
+    order: 14,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The fourth step in the Fall Prevention Plan is properly managing your medications. Medications are designed to improve health, but sadly some have negative side effects or interactions with other medications that increase the risk of falls. Unfortunately, this phenomenon occurs more frequently in the older adult population where taking multiple medications and slowed drug metabolism is common.
+
+To minimize your risk of falling due to a medication, follow this action plan:
+
+1. Take all prescription drugs, over-the-counter medications, vitamins, and supplements only as directed.
+2. Keep an updated list of all prescription drugs, over-the-counter medications, vitamins, and supplements, noting dosages and frequency taken.
+3. Share this list with every doctor at each appointment.
+4. Inform your primary care physician about any medication changes made by specialists.
+5. Regularly review your medication list with your primary care physician and pharmacist to identify harmful interactions, duplicates, or unnecessary prescriptions.
+6. Discuss fall risk concerns with your doctors and request that medications with minimal impact on balance be considered. If a medication increases fall risk and no alternatives exist, ask for strategies to reduce its effects.
+
+![Medicine bottles, pills, a patient in conversation with a physician, and a person talking with their pharmacist]()
+
+## My Medication List
+
+Keep an up-to-date list of everything you take. Use the **Download Printable Guide** button to print this form, then bring it to every appointment and to your medication review with your pharmacist.
+
+| Medication | Dosage | Frequency | Time(s) Taken | Prescribing Provider |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |`,
+    keyPoints: [
+      "Take all prescriptions, over-the-counter medications, vitamins, and supplements only as directed.",
+      "Keep an updated list of everything you take, with dosages and frequency, and share it with every doctor at each appointment.",
+      "Regularly review your list with your primary care physician and pharmacist to catch harmful interactions, duplicates, or unnecessary prescriptions.",
+      "Ask your doctors about medications with minimal impact on balance — or strategies to reduce the effects of those that raise fall risk.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 5: Nutrition and Hydration -----
+  {
+    slug: "step-5-nutrition-hydration",
+    title: "Step 5: Nutrition and Hydration",
+    subtitle: "Eating and drinking to stay steady",
+    order: 15,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The fifth step in the Fall Prevention Plan is consuming a diet that minimizes your chances of falling. Maintaining proper nutrition and hydration plays a key role in reducing your risk of falls. In fact, poor dietary intake is actually the leading cause of serious falls, those requiring hospital admission, for senior adults.
+
+A diet that consists of the proper amount of calories and fluid will help to maximize your strength, mental clarity, balance, and fall avoidance, while a diet lacking an adequate amount of calories and fluid can lead to weakness, confusion, unsteadiness, and ultimately increased fall risk.
+
+The types of nutrients your diet consists of is also very important. A diet rich in protein will help create a lean body with higher levels of energy, greater amounts of muscle, and that is generally better able to manage unsteadiness and avoid falls, whereas a diet rich in carbohydrates and sugar will create a body with higher percentages of fat, lower amounts of energy, smaller amounts of muscle, and that is generally more susceptible to unsteadiness and falling.
+
+To minimize your chances of falling, maintaining a good diet is key. Below are the recommended dietary guidelines to help you achieve this:
+
+![A health-conscious diet — fresh, nutritious food]()
+
+## Recommended Daily Calorie Intake for Senior Adults
+
+**Male**
+
+| Activity Level | Daily Calorie Need |
+| --- | --- |
+| Sedentary Lifestyle | 2,000–2,200 calories a day |
+| Moderately Active Lifestyle | 2,200–2,400 calories a day |
+| Highly Active Lifestyle | 2,400–2,800 calories a day |
+
+**Female**
+
+| Activity Level | Daily Calorie Need |
+| --- | --- |
+| Sedentary Lifestyle | 1,600 calories a day |
+| Moderately Active Lifestyle | 1,800 calories a day |
+| Highly Active Lifestyle | 2,000–2,200 calories a day |
+
+If you want an exact amount, here's a link to a calorie calculator: [Calorie Calculator](https://www.gigacalculator.com/calculators/calorie-calculator.php)
+
+\\*All diet changes should be discussed with your physician.
+
+## Recommended Daily Fluid Intake for Senior Adults
+
+| Body Weight | Fluid Intake Per Day |
+| --- | --- |
+| 90 lbs | 30–45 ounces |
+| 100 lbs | 33–50 ounces |
+| 110 lbs | 36–55 ounces |
+| 120 lbs | 40–60 ounces |
+| 130 lbs | 43–65 ounces |
+| 140 lbs | 46–70 ounces |
+| 150 lbs | 50–75 ounces |
+| 160 lbs | 53–80 ounces |
+| 170 lbs | 56–85 ounces |
+| 180 lbs | 60–90 ounces |
+| 190 lbs | 62–95 ounces |
+| 200 lbs | 66–100 ounces |
+| 210 lbs | 69–105 ounces |
+| 220 lbs | 73–110 ounces |
+| 230 lbs | 76–115 ounces |
+| 240 lbs | 79–120 ounces |
+| 250 lbs | 83–125 ounces |
+
+\\*Higher levels indicated during periods of increased activity or temperature.
+\\*\\*All diet changes should be discussed with your physician.
+
+If you want an exact amount, here's a link to a fluid intake calculator: [Water Intake Calculator](https://www.gigacalculator.com/calculators/water-intake-calculator.php)
+
+## Recommended Daily Protein Intake for Senior Adults
+
+| Body Weight | Protein Intake Per Day |
+| --- | --- |
+| 90 lbs | 49–65 grams |
+| 100 lbs | 54–72 grams |
+| 110 lbs | 59–79 grams |
+| 120 lbs | 65–86 grams |
+| 130 lbs | 70–94 grams |
+| 140 lbs | 76–101 grams |
+| 150 lbs | 81–108 grams |
+| 160 lbs | 86–115 grams |
+| 170 lbs | 92–122 grams |
+| 180 lbs | 97–130 grams |
+| 190 lbs | 103–137 grams |
+| 200 lbs | 108–144 grams |
+| 210 lbs | 113–151 grams |
+| 220 lbs | 119–159 grams |
+| 230 lbs | 124–166 grams |
+| 240 lbs | 130–173 grams |
+| 250 lbs | 135–180 grams |
+
+\\*Higher levels indicated when attempting to add muscle.
+\\*\\*All diet changes should be discussed with your physician.
+
+If you want an exact amount, here's a link to a protein intake calculator: [Protein Calculator](https://www.calculator.net/protein-calculator.html)
+
+## A Special Note on Protein
+
+When it comes to fall prevention, protein is the super nutrient. It serves a dual function of fueling the body to perform daily activities and as the building block of muscle, one of the body's primary reducers of fall risk. To maintain or build muscle, senior adults should aim to consume between 0.54–0.72 grams of protein per pound of body weight per day.
+
+The primary protein sources for the body are meat, poultry, fish, dairy, beans, lentils, nuts, and seeds. Below is a list of common foods and their protein content to help you determine if your current diet is adequate.
+
+### Protein Content Per Food Group
+
+| Food Type | Serving Size | Protein Content |
+| --- | --- | --- |
+| Beef, Chicken, Turkey, Pork, Lamb | 6 oz | 42 grams |
+| Fish, Seafood | 6 oz | 36–42 grams |
+| Eggs | 1 egg | 6 grams |
+| Lentils | ½ cup | 9 grams |
+| Beans | ½ cup | 7–8 grams |
+| Peanut butter | 2 Tbsp | 7 grams |
+| Nuts | 1 oz (¼ cup) | 4–6 grams |
+| Milk | 8 oz | 8 grams |
+| Yogurt, fat free, light | 6 oz | 5 grams |
+| Greek yogurt | 5 oz | 12–18 grams |
+| Cheese | 1 oz | 7 grams |
+| Cottage cheese | ½ cup | 14 grams |
+
+If your diet lacks the appropriate amount of protein, the first step should be to try to increase your intake of natural protein sources at each meal. If that isn't enough or you aren't able, consider adding a protein supplement to your regular diet to meet the recommended daily protein intake levels.
+
+Protein supplements come in many different forms, including: powder, pre-made shakes, juices, snack bars, and cookies. Supplements providing the highest amount of protein and the lowest amount of added sugar are best — e.g. 30 grams of protein, 0 grams of added sugar. If you are diabetic, use a protein supplement that provides glycemic control. Below are examples with links to purchase protein supplements on Amazon:
+
+- Protein Powder: <https://a.co/d/00IAHd68>
+- Protein Shakes: <https://a.co/d/094NTmFQ>
+- Protein Juices: <https://a.co/d/07z47Gfy>
+- Protein Bars: <https://a.co/d/0713jM4I>
+- Protein Cookies: <https://a.co/d/0hVAgNc3>
+
+If you are serious about avoiding falls, having a diet rich in protein is critical.
+
+\\*All diet changes should be discussed with your physician.`,
+    keyPoints: [
+      "Poor dietary intake is the leading cause of serious falls (those requiring hospital admission) in senior adults.",
+      "Adequate calories and fluid support strength, mental clarity, and balance; too little leads to weakness, confusion, and unsteadiness.",
+      "Protein is the 'super nutrient' for fall prevention — aim for 0.54–0.72 grams per pound of body weight per day, from food first and a supplement if needed.",
+      "Use the calorie, fluid, and protein tables (and the linked calculators) to check whether your diet is adequate. All diet changes should be discussed with your physician.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 6: Posture -----
+  {
+    slug: "step-6-posture",
+    title: "Step 6: Posture",
+    subtitle: "Holding your body for better balance",
+    order: 16,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:The three posture recommendations performed in sequence, and the postural stretching program",
+    body: `The sixth step in the Fall Prevention Plan is maintaining good posture. Posture, or how you hold your body, is key to having good balance. Unfortunately, posture often deteriorates with age, and can, if left unaddressed, lead to increased fall risk. The most common posture changes seen in older adults include a forward, backward, and/or lateral leaning trunk, rounded upper back, protruding neck and head, and bent knees.
+
+![Examples of abnormal posture]()
+
+To improve posture and reduce fall risk, focus on these strategies:
+
+1. Stand tall with an upright trunk, shoulders and head back, and knees straight.
+2. While walking, fix your gaze twenty to thirty feet ahead of body unless navigating a known trip hazard, that is don't look straight down at the ground.
+3. Take steps that extend in front of the body, landing heel-first.
+4. Perform postural stretches 2-3 times per week targeting the chest, anterior hip, and hamstrings.`,
+    keyPoints: [
+      "Stand tall: upright trunk, shoulders and head back, knees straight.",
+      "While walking, look 20–30 feet ahead rather than straight down (except to navigate a known trip hazard).",
+      "Take steps that extend in front of the body, landing heel-first.",
+      "Perform postural stretches 2–3 times per week for the chest, anterior hip, and hamstrings.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 7: Creating a Safe Home Environment -----
+  {
+    slug: "step-7-safe-home-environment",
+    title: "Step 7: Creating a Safe Home Environment",
+    subtitle: "Simple changes that make home safer",
+    order: 17,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The seventh step in the Fall Prevention Plan is to create a safe home environment. Most falls happen in the comfort of one's own home. Despite the majority of people feeling safest there, homes are actually the most likely place for falls to occur. Fortunately, there is a solution. Research shows that implementing simple home safety modifications can significantly reduce the chance of falling there.
+
+Here are proven ways to make your home safer:
+
+- Keep your home clean and clutter-free.
+- Arrange furniture to create clear and wide walking paths.
+- Remove throw rugs or secure their edges to the floor.
+- Organize closets and cabinets to avoid excessive reaching or bending.
+- Ensure adequate lighting indoors and on outdoor walkways.
+- Install nightlights in frequently used areas.
+- Use chairs eighteen to twenty-two inches tall with backs and arms.
+- In the bathroom, install a raised toilet seat with arm rests, grab bars at the entrance of and in the tub or shower, and non-slip strips on the tub or shower floor. If your balance is moderate to significantly compromised, consider a shower chair with a back and arms. If stepping over the tub wall is difficult, consider using a tub bench. See the Appendix of Home Safety Modifications and Equipment for equipment description and recommendations.
+- Set your bed height between eighteen to twenty-three inches (when sat on) and add a bed rail if getting in and out is challenging.
+- Create a designated dressing area with a sturdy chair and solid surface for support.
+- Ensure stairs are well-lit, have handrails on one or both sides, and feature marked edges for visibility.
+
+![Medical equipment and an orderly home environment — wide walkways and organized shelves]()
+
+For a thorough explanation of home modifications and durable medical equipment that can be used to improve the safety of the home environment and assistance with ordering, please refer to the section titled **Appendix of Home Safety Modifications and Equipment**.`,
+    keyPoints: [
+      "Most falls happen at home — simple modifications significantly reduce the risk.",
+      "Keep paths clear and clutter-free, remove or secure throw rugs, and ensure good lighting and nightlights.",
+      "Use chairs 18–22 inches tall with backs and arms, and set bed height 18–23 inches (when sat on).",
+      "Make the bathroom safe with a raised toilet seat with arm rests, grab bars, and non-slip strips — see Appendix B for equipment and ordering.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 8: Choosing the Right Assistive Device -----
+  {
+    slug: "step-8-assistive-devices",
+    title: "Step 8: Choosing the Right Assistive Device",
+    subtitle: "Canes, walkers, and wheelchairs",
+    order: 18,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:How to fit a walker and a cane",
+    body: `The eighth step in the Fall Prevention Plan is selecting the appropriate assistive device. Assistive devices are very effective for improving balance and safety, and are generally considered to be one of the best fall prevention strategies available. They also boost strength, confidence, activity level, and overall quality of life and are therefore strongly recommended if a person has an increased risk of falls.
+
+There are four main types of assistive devices: Canes, 2 Wheel Rolling Walkers, 4 Wheel Rolling Walkers, and Wheelchairs. Each model provides a different level of support and has multiple variations designed to accommodate a wide range of body sizes and needs.
+
+![The four general types of assistive devices, and people using them independently]()
+
+To minimize fall risk, it is imperative to choose the right assistive device. Follow this two step plan to determine which assistive device is best for you:
+
+**Step 1: Identify the appropriate assistive device type.**
+
+- Canes: Suitable for people with mild balance issues.
+- 4 wheel rolling walkers: Ideal for people with mild to moderate balance issues or low endurance.
+- 2 wheel rolling walkers: Best for people with moderate+ to significant balance challenges.
+- Wheelchairs: Designed for people with major balance deficits.
+
+**Step 2: If necessary, select a variation from the standard assistive device model that accommodates for any specific body characteristic or use case need.**
+
+- Junior size: For shorter individuals.
+- Tall size: For taller individuals.
+- Bariatric size: For those with higher weight.
+- Lightweight: For frequent travelers.
+- Super Light: For frequent travelers with limited strength.
+- Large-wheel: For rough terrain or a smoother ride.
+
+### Special Note: Assistive Device Fitting
+
+Properly fitting an assistive device is essential to maximizing safety and efficiency with use. To properly fit a cane or rolling walker, follow this two-step process:
+
+1. Stand in your normal posture with arms hanging at your side.
+2. Adjust the height of the cane or walker handle at or just above the wrist.
+
+If you need help choosing which assistive device is best for you, please refer to the **Appendix of Assistive Devices**.`,
+    keyPoints: [
+      "Assistive devices are one of the best fall-prevention strategies and are strongly recommended for anyone at increased risk.",
+      "Match the device to your balance: cane (mild), 4-wheel walker (mild–moderate or low endurance), 2-wheel walker (moderate+ to significant), wheelchair (major deficits).",
+      "Choose a variation (junior, tall, bariatric, lightweight, super light, large-wheel) for your body and needs.",
+      "Fit a cane or walker by standing in normal posture with arms at your sides and setting the handle at or just above the wrist. See Appendix A for help choosing.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 9: Strength Training -----
+  {
+    slug: "step-9-strength-training",
+    title: "Step 9: Strength Training for Fall Prevention",
+    subtitle: "Three home programs and a fitness-center program",
+    order: 19,
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:Each complete Home Exercise Program (Levels 1, 2, and 3) performed start to finish",
+    body: `The ninth step in the Fall Prevention Plan is to be physically strong. Strength is critical for preventing falls. It forms the foundation for good balance and is directly correlated to fall risk. Maintaining strength through the aging process however is not a given, it requires effort, and without regular performance of activities that build strength, muscles will weaken over time, and fall risk will increase. Performing Strengthening Exercises is the solution. They build muscle, lower fall risk, and are therefore a key component of a successful Fall Prevention Plan. Fortunately, strengthening exercise programs designed to reduce falls don't have to be elaborate to be effective. Research shows that regular performance of even a few targeted exercises, done to a point of fatigue can build muscle and significantly reduce fall risk. Exercises can be done at home or in a gym, and can even be selected to match your time availability and overall interest level. The key to success with an exercise program is choosing a routine that you'll stick with. It is best to start with a small program, and gradually add more exercises if desired, versus jumping into a large program and possibly quitting before exercise benefits are realized.
+
+**To reduce fall risk, find a balance focused exercise program that works for you and be consistent with it!**
+
+Presented below are 3 Home Exercise Programs and 1 Fitness Center Program specifically designed for fall prevention. They are listed in order of increasing complexity and time required to complete them. Each program has sections that address strength, flexibility, and endurance, and instructions are provided in how to correctly perform each one. Review the programs and select the one that most closely matches your commitment level and time availability.
+
+# Home Exercise Programs for Fall Prevention
+
+## Level 1 Home Exercise Program for Fall Prevention
+
+**Strength: perform 2–3 times per week.**
+
+- **Heel ups:** stand with your feet at shoulder width apart and holding a firm surface for support. Rise up on your toes as high as able, then relax and return to the original position. Repeat to muscle fatigue.
+- **Sit-to-stand:** sit on a regular height chair that has a firm seat. Stand to an upright position, then relax and return to the seated position. Use your hands only if needed. Repeat to muscle fatigue.
+
+**Flexibility: perform 2–3 times per week.**
+
+- **Chest Stretch:** sit towards the front of a chair with your head and trunk erect, and your hands clasped behind your back. Pull your shoulders back until a "strong, but comfortable" stretch is felt across the chest. Hold 15 seconds. Perform 2-3 times. This stretch can also be performed in standing, if your balance status allows.
+
+**Endurance: perform 3–5 times per week.**
+
+- Walk on flat indoor or outdoor terrain, using a cane or walker as necessary, targeting a 20–30 minute duration at a moderate intensity, and stopping if needed. Do not use a treadmill. If walking is too difficult, see option 2 below.
+- Ride a Recumbent Bike, Stationary Bike, or Nu-Step if you are unable to tolerate walking for at least 10 minutes. Target a duration of 20–30 minutes at a moderate intensity, stopping if needed.
+
+## Level 2 Home Exercise Program for Fall Prevention
+
+**Strength: perform 2–3 times per week.**
+
+- **Heel ups:** stand with your feet at shoulder width apart and holding a firm surface for support. Rise up on your toes as high as able, then relax and return to the original position. Repeat to muscle fatigue.
+- **Crunch/Sit-Up:** lie on your back with your hands behind your head, knees bent to 90°, and feet flat on the bed surface. Raise your head and trunk off the bed as high as able, then relax and return to the original position. Repeat to muscle fatigue. Do not perform if you have osteoporosis or osteopenia.
+- **Bridges:** lie on your back with your knees bent to 90 degrees, feet flat on the bed and your arms on the bed beside you. Raise your bottom off the bed as high as you can, then relax and return to the original position. Repeat to muscle fatigue. This exercise may not be tolerated if you have spinal stenosis.
+- **Clam Shell:** lie on your right side with the left leg resting on top of the right leg, hips bent to 45 degrees, and knees bent to 90 degrees. Lift your left knee up and down as high as you can while keeping your feet together and your body from rolling backwards. Repeat to muscle fatigue, then perform the same exercise on the opposite side of the body. If this exercise is too easy, straighten your legs and lift a straight left leg as high as you are able, keeping the left foot pointed straight forward/rotated slightly inward and your body from rolling backward. Repeat to muscle fatigue, then perform the same exercise on the opposite side of the body.
+- **Sit-to-Stand:** sit on a regular height chair that has a firm seat. Stand to an upright position, then relax and return to the seated position. Use your hands only if needed. Repeat to muscle fatigue.
+
+**Flexibility: perform 2–3 times per week.**
+
+- **Hamstring Stretch:** sit towards the front of a chair with your right leg straight in front of the body and your right heel on the ground. Lean forward and extend your right hand toward your right toes until a "strong, but comfortable stretch" is felt in the back of the right thigh. Hold 15 seconds. Repeat on the left. Perform stretch 2–3 times on each leg.
+- **Chest Stretch:** sit towards the front of a chair with your head and trunk in an erect posture, and your hands clasped behind your back. Pull your shoulders back until a "strong, but comfortable" stretch is felt across the chest. Hold 15 seconds. Perform stretch 2-3 times. This stretch can also be performed in standing if your balance status allows.
+
+**Endurance: perform 4–5 times per week.**
+
+- Walk on flat indoor or outdoor terrain, using a cane or walker as necessary, targeting a 20–30 minute duration at a moderate intensity, and stopping if needed. Do not use a treadmill. If walking is too difficult, see option 2 below.
+- Ride a Recumbent Bike, Stationary Bike, or Nu-Step if you are unable to tolerate walking for at least 10 minutes. Target a duration of 20–30 minutes at a moderate intensity, stopping if needed.
+
+## Level 3 Home Exercise Program for Fall Prevention
+
+**Strength: perform 2–3 times per week.**
+
+- **Heel ups:** stand with your feet at shoulder width apart and holding a firm surface for support. Rise up on your toes as high as able, then relax and return to the original position. Repeat to muscle fatigue.
+- **Crunch/Sit-Up:** lie on your back with your hands behind your head, knees bent to 90°, and feet flat on the bed surface. Raise your head and trunk off the bed as high as able, then relax and return to the original position. Repeat to muscle fatigue. Avoid if you have osteoporosis or osteopenia.
+- **Bridges:** lie on your back with your knees bent to 90 degrees, feet flat on the bed and your arms on the bed beside you. Raise your bottom off the bed as high as you can, then relax and return to the original position. Repeat to muscle fatigue. This exercise may not be tolerated if you have spinal stenosis.
+- **Hip Roll:** lie on your back with your knees bent to 90 degrees, feet flat on the bed, and your arms lying on the bed surface extended away from your body. Rotate your hips side to side as far as able at a good pace. Repeat to muscle fatigue.
+- **Clam Shell:** lie on your right side with the left leg resting on top of the right leg, hips bent to 45 degrees, and knees bent to 90 degrees. Lift your left knee up and down as high as you can while keeping your feet together and your body from rolling backwards. Repeat to muscle fatigue, then perform the same exercise on the opposite side of the body. If this exercise is too easy, straighten your legs and lift a straight left leg up and down as high as you are able, keeping the left foot pointed straight forward/rotated slightly inward and your body from rolling backward. Repeat to muscle fatigue, then perform the same exercise on the opposite side of the body.
+- **Sit-to-Stand:** sit on a regular height chair that has a firm seat. Stand to a fully upright position, then relax and return to the seated position. Use your hands only if needed. Repeat to muscle fatigue.
+
+**Flexibility: perform stretches 2–3 times per week.**
+
+- **Neck and Trunk Rotation Stretch:** sit with an upright posture on a chair or bed. Twist your head and trunk as far as you can to the right, hold for 15 seconds, then repeat to the left. Perform stretch 2-3 times to each side.
+- **Hamstring Stretch:** sit towards the front of a chair with your right leg straightened in front of the body and your right heel on the ground. Lean forward and extend your right hand toward your right toes until a "strong, but comfortable stretch" is felt in the back of the right thigh. Hold 15 seconds. Repeat on the left. Perform stretch 2–3 times on each leg.
+- **Chest Stretch:** sit towards the front of a chair with your head and trunk in an upright posture, and your hands clasped behind your back. Pull your shoulders back until a "strong, but comfortable" stretch is felt across the chest. Hold 15 seconds. Perform stretch 2-3 times. If your balance status allows, this stretch can also be performed in standing.
+- **Calf Stretch:** stand with feet at shoulder width apart and holding a firm surface. Take a full step backwards with your right foot, press your heel flat against the floor, then gently lean your body forward until a "strong, but comfortable" stretch is felt in the back of the right calf. Hold 15 seconds and then repeat on the left. Perform stretch 2–3 times on each leg.
+- **Anterior Hip Stretch:** stand with feet at shoulder width apart and holding a firm surface. Take a full step backwards with your right foot then arch your pelvis and trunk backwards until a "strong, but comfortable" stretch is felt at the front of the right hip. Hold for 15 seconds then repeat on the left. Perform stretch 2–3 times on each leg. Do not perform if you've recently had a total hip replacement or have ever had an anterior approach total hip replacement.
+
+**Endurance: perform 4–5 times per week.**
+
+- Walk on flat indoor or outdoor terrain, using a cane or walker as necessary, targeting a 20–30 minute duration at a moderate intensity, and stopping if needed. Do not use a treadmill. If walking is too difficult, see option 2 below.
+- Ride a Recumbent Bike, Stationary Bike, or Nu-Step if you are unable to tolerate walking for at least 10 minutes. Target a duration of 20–30 minutes at a moderate intensity, stopping if needed.
+
+# Fitness Center Exercise Program for Fall Prevention
+
+This section outlines an Exercise Program for Fall Prevention to be completed on exercise machines typically found in a Fitness Center or Gym. If you do not have experience with this type of equipment, it is recommended to work with a trainer for 1-3 sessions to build familiarity with machine set up and use prior to performing the program on your own. Follow the instructions below to create an effective and personalized program.
+
+> 📄 A print-ready handout of this Fitness Center Program is available with the **Download Printable Guide** button — take it to the gym or hand it to a personal trainer.
+
+**Strength — Instructions**
+
+- Set exercise machines to properly fit your body.
+- Perform 1 set of each exercise, 2-3 times per week.
+- Perform the exercises through full range of motion while using proper form.
+- Use resistance levels that result in muscle fatigue at 15 repetitions.
+- Stop the exercise if you are no longer able to complete the exercise through the full range of motion using proper form.
+- Increase the resistance by 5% when 15 repetitions becomes easy.
+- Keep a log of the repetition numbers and resistance levels completed at each session to help guide progression.
+
+\\*More than 1 set of each exercise can be performed if desired, however expect to complete fewer repetitions with each additional exercise set performed.
+
+**Exercises to be performed include:**
+
+- Leg Press
+- Hip Adduction
+- Hip Abduction
+- Knee Extension
+- Knee Flexion
+- Low Back Extension
+- Partial Sit Up on Incline Bench (perform to fatigue)
+- Heel Ups (see description above)
+
+**Flexibility: perform stretches 2–3 times per week.**
+
+- **Neck and Trunk Rotation Stretch:** sit with an upright posture on a chair or bench. Twist your head and trunk as far as you can to the right, hold for 15 seconds, then repeat to the left. Perform stretch 2-3 times to each side.
+- **Hamstring Stretch:** sit towards the front of a chair with your right leg straightened in front of the body and your right heel on the ground. Lean forward and extend your right hand toward your right toes until a "strong, but comfortable stretch" is felt in the back of the right thigh. Hold 15 seconds. Repeat on the left. Perform stretch 2–3 times on each leg.
+- **Chest Stretch:** sit towards the front of a chair with your head and trunk in an upright posture, and your hands clasped behind your back. Pull your shoulders back until a "strong, but comfortable" stretch is felt across the chest. Hold 15 seconds. Perform stretch 2-3 times. If your balance status allows, this stretch can also be performed in standing.
+- **Calf Stretch:** stand with feet at shoulder width apart and holding a firm surface. Take a full step backwards with your right foot, press your heel flat against the floor, then gently lean your body forward until a "strong, but comfortable" stretch is felt in the back of the right calf. Hold 15 seconds and repeat on the left. Perform stretch 2–3 times on each leg.
+- **Anterior Hip Stretch:** stand with feet at shoulder width apart and holding a firm surface. Take a full step backwards with your right foot then arch your pelvis and trunk backwards until a "strong, but comfortable" stretch is felt at the front of the right hip. Hold for 15 seconds then repeat on the left. Perform stretch 2–3 times on each leg. Do not perform if you've recently had a total hip replacement or have ever had an anterior approach total hip replacement.
+
+**Endurance: perform 4–5 times per week.**
+
+- Walk on flat indoor or outdoor terrain, using a cane or walker as necessary, targeting a 20–30 minute duration at a moderate intensity, and stopping if needed. Do not use a treadmill. If walking is too difficult, see option 2 below.
+- Ride a Recumbent Bike, Stationary Bike, or Nu-Step if you are unable to tolerate walking for at least 10 minutes. Target a duration of 20–30 minutes and stop if needed.`,
+    keyPoints: [
+      "Strength forms the foundation for good balance and is directly correlated to fall risk — without training, muscles weaken and fall risk rises.",
+      "Even a few targeted exercises done to fatigue can build muscle and significantly reduce fall risk.",
+      "Start small with a routine you'll stick with, and progress gradually; each program covers strength, flexibility, and endurance.",
+      "Choose the Home Program level (1–3) that matches your commitment and time, or use the Fitness Center Program (printable handout) at a gym.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ----- Step 10: Balance Exercises -----
+  {
+    slug: "step-10-balance-exercises",
+    title: "Step 10: Balance Exercises",
+    subtitle: "Six balance programs by fall-risk level",
     order: 20,
-    planSection: "five_point",
-    durationMin: 25,
-    videoEmbedUrl: "https://player.vimeo.com/video/76979871",
-    body: `## When you only have one afternoon
+    planSection: "ten_point",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:Each Balance Program (Levels 1–6) demonstrated start to finish",
+    body: `The final, and arguably most important, step in the Fall Prevention Plan is to maximize balance. Balance, or the act of maintaining a steady position, is the body's primary defense against falling. Unfortunately, unless a person is actively engaged in activities that preserve it, balance, like strength, will deteriorate with age and fall risk will increase. Fortunately, there is hope, balance can be maintained and improved. Research shows that consistent performance of even a limited number of balance exercises increases body stability and lowers fall risk, and that well-designed balance programs are the gold standard in fall prevention due to their effectiveness in improving balance, safety confidence, and fall avoidance.
 
-The full 10-Point Plan is the right place to land. But sometimes a family member is visiting for the weekend and wants to help, or you have just had a scare and want to do *something* today. This Quick Start is the high-leverage 20% — five changes that together cover most of what matters.
+**If you are serious about reducing fall risk, performing a well-designed balance program is strongly recommended.**
 
-### 1. Walk through the bathroom
+Presented below are six balance programs specifically designed to reduce the risk of falls. They are listed in order of increasing intensity and are labeled to indicate the fall risk level they are designed to target. Review each of the programs and select the one that most closely matches your current balance and fall risk level. As your balance improves, progress to the next Balance Program Level.
 
-Install (or commit to installing) two grab bars: one beside the toilet and one in the shower or tub. Anchored into studs, not suction-cup. This single change has the largest evidence base of any home modification.
+An important note: each program is preceded by specific safety instructions to be used during their performance. Please follow the provided safety strategies recommended for each program.
 
-### 2. Audit the floors
+![Balance-related backdrop — e.g. someone tightrope walking]()
 
-Walk through every room. Pick up every throw rug. If you absolutely must keep one, tape down every edge with double-sided rug tape. Tape or move every cord that crosses a walkway.
+> 📄 Each balance program has a print-ready handout — use the **Download Printable Guide** button to take it with you while you exercise.
 
-### 3. Replace one pair of shoes
+## Level 1 Balance Program: High Fall Risk
 
-Find the worst pair you wear regularly — usually backless slippers, smooth-soled dress shoes, or worn-out sneakers — and replace them with something that has a firm, thin sole, a low broad heel, and a non-slip tread. One good pair for indoors, one for out.
+**Safety Recommendations:** perform balance program standing in the corner of a room with your back to the wall, a locked walker or heavy chair in front of the body, and a capable person standing nearby for safety. Initiate the balance challenges with your hands on the walker or chair. As your confidence increases, slowly wean your hands to fingertip contact only and then completely off the supportive surface as you are able.
 
-### 4. Schedule two appointments
+1. Stand with feet at shoulder width apart. Hold position up to 10 seconds. Perform 3 times.
+2. Stand with the right foot a small step forward of the left. Hold position up to 10 seconds. Perform 3 times.
+3. Stand with the left foot a small step forward of the right. Hold position up to 10 seconds. Perform 3 times.
 
-- A **comprehensive eye exam** if your last one was more than a year ago.
-- A **brown-bag medication review** with your pharmacist, bringing every prescription, over-the-counter product, and supplement.
+## Level 2 Balance Program: High to Moderate Fall Risk
 
-These are two phone calls. They are the two highest-impact medical conversations in the whole plan.
+**Safety Recommendations:** perform the balance program standing in the corner of a room with your back to the wall, a locked walker or heavy chair in front of the body, and a capable person standing nearby for safety. Initiate the balance challenges with your hands on the walker or chair. As your confidence increases, slowly wean your hands to fingertip contact only and then completely off the supportive surface as you are able.
 
-### 5. Start the five-minute daily routine
+1. Stand with the right foot a medium step forward of the left. Hold position up to 10 seconds. Perform 2 times.
+2. Stand with the left foot a medium step forward of the right. Hold position up to 10 seconds. Perform 2 times.
+3. Stand with feet together. Hold position up to 10 seconds. Perform 2 times.
+4. Standing with feet at shoulder width apart, turn head and shoulders side to side. Perform 3 times.
+5. Standing with feet at shoulder width apart, bend forward and back. Perform 3 times.
+6. Standing with feet at shoulder width apart, rock body side to side. Perform 5 times.
+7. Standing with feet at shoulder width apart, rock body forward and back. Perform 5 times.
 
-From Module 2: heel-to-toe stand, single-leg stand, heel raises, sideways walking, sit-to-stand. Five minutes, every morning, near a counter you can grab.
+## Level 3 Balance Program: Moderate Fall Risk
 
-## What you'll have done in one afternoon
+**Safety Recommendations:** perform the balance program standing in the corner of a room with your back to the wall, a locked walker or heavy chair in front of the body, and a capable person standing nearby for safety. Initiate the balance challenges with your hands on the walker or chair. As your confidence increases, slowly wean your hands to fingertip contact only and then completely off the supportive surface as you are able.
 
-If you do all five of these — most of which are a single phone call or a single trip to the hardware store — you will have addressed the bathroom, the floors, your shoes, your eyes, your medications, and your daily practice. That is the great majority of fall risk for most people.
+1. Standing with feet together, turn head and shoulders side to side, then up and down. Perform 2 times.
+2. Standing with right foot a medium step forward of the left, turn head and shoulders side to side, then up and down. Perform 2 times.
+3. Standing with left foot a medium step forward of the right, turn head and shoulders side to side, then up and down. Perform 2 times.
+4. Standing with feet at shoulder width apart, rock up and down on heels and toes. Perform 10 times.
+5. Standing with feet at shoulder width apart, march in place. Perform 10 times.
+6. Standing with feet at shoulder width apart, step forward with right foot and back to the starting position, then step forward with your left foot and back to the starting position. Perform 5 times.
+7. Standing with feet at shoulder width apart, step to the side with right foot and back to the starting position, then step to the side with your left foot and back to the starting position. Perform 5 times.
+8. Standing with feet at shoulder width apart, step backwards with the right foot and return to the starting position, then step backwards with the left foot and back to the starting position. Perform 5 times.
 
-The full 10-Point Plan goes deeper on each of these and adds nutrition, strength, recovery, and habits. But this is a real, meaningful start.
+## Level 4 Balance Program: Low to Moderate Fall Risk
 
-## Homework
+**Safety Recommendations:** perform balance program standing at the kitchen sink. Initiate balance challenges with fingertips on the kitchen sink/counter. Gradually wean fingertips off the support surface as confidence increases.
 
-Print the checklist below. Do as much as you can in one afternoon. Whatever is left, schedule for next week.`,
+1. Standing with feet together, turn head and shoulders side to side, then up and down. Perform 2 times.
+2. Standing with the right foot a full step forward of the left foot, turn head and shoulders side to side, then up and down. Perform 2 times.
+3. Standing with the left foot a full step forward of the right foot, turn head and shoulders side to side, then up and down. Perform 2 times.
+4. Standing with feet at shoulder width apart, rock up and down on heels and toes. Perform 10 times.
+5. Standing with feet at shoulder width apart, march in place. Perform 10 times.
+6. Standing with feet at shoulder width apart, step forward with right foot and back to the starting position, then step forward with the left foot and back to the starting position. Perform 5 times.
+7. Standing with feet at shoulder width apart, step to the side with right foot and back to the starting position, then step to the side with the left foot and back to the starting position. Perform 5 times.
+8. Standing with feet at shoulder width apart, step backwards with the right foot and return to the starting position, then step backwards with the left foot and return to the starting position. Perform 5 times.
+9. Stand on right leg only up to 25 seconds, then left leg only up to 25 seconds. Perform 2-3 times.
+
+## Level 5 Balance Program: Low Fall Risk
+
+**Safety Recommendations:** perform balance program standing at the kitchen sink. Initiate balance challenges with fingertips on the kitchen sink/counter. Gradually wean fingertips off the support surface as confidence increases.
+
+1. Standing with feet together, turn head and shoulders side to side, then up and down. Perform 2 times.
+2. Standing with the right foot a full step forward of the left, turn head and shoulders side to side, then up and down. Perform 2 times.
+3. Standing with the left foot a full step forward of the right, turn head and shoulders side to side, then up and down. Perform 2 times.
+4. Standing with feet at shoulder width apart, rock up and down on heels and toes. Perform 10 times.
+5. Standing with feet at shoulder width apart, march in place. Perform 10 times.
+6. Standing with feet at shoulder width apart, step forward with right foot and back to the starting position, step to the side with the right foot and back to the starting position, then step backwards with the right foot and return to the starting position. Repeat the sequence on the left, stepping forward with the left foot and back to the starting position, stepping to the side with the left foot and back to the starting position, then stepping backwards with the left foot and back to the starting position. Perform 5 times.
+7. Side step 10 steps to the right, then 10 steps to the left. Perform 3 times.
+8. High step forward 10 steps and normal step backwards 10 steps. Perform 3 times.
+9. Stand on right leg up to 25 seconds, then on left leg up to 25 seconds. Repeat 2-3 times.
+
+## Level 6 Balance Program: Negligible to Low Fall Risk
+
+**Safety Recommendations:** perform balance routine in a large area, free of obstruction.
+
+1. Stand with feet together and eyes closed. Hold position up to 30 seconds. Perform 1 time.
+2. Stand with right foot a full step forward of the left foot and eyes closed. Hold position up to 30 seconds. Then stand with the left foot a full step forward of the right foot and eyes closed. Hold position up to 30 seconds. Perform 1 time.
+3. Standing with feet at shoulder width apart, step forward with right foot and back to the starting position, step to the side with the right foot and back to the starting position, then step backwards with the right foot and return to the starting position. Repeat the sequence on the left, stepping forward with the left foot and back to the starting position, stepping to the side with the left foot and back to the starting position, then stepping backwards with the left foot and returning to the starting position. Perform 5 times.
+4. Side step 10 steps to the right, then 10 steps to the left. Perform 3 times.
+5. High step forward 10 steps, then normal step backwards 10 steps. Perform 3 times.
+6. Standing on right leg, turn body to the right and left, then stand on the left leg and turn body to the right and left. Perform 3 times.
+7. Standing on the right leg, bend body forward and back then stand on the left leg and turn body to the right and left. Perform 3 times.
+8. Step 3 times to your right, 2 steps backwards, 3 steps to your right, 2 steps forward, 3 steps to your left, 2 steps backwards, 3 steps to the left, 2 steps forward. Then repeat in the opposite direction: 2 steps backwards, 3 steps to your right, 2 steps forward, 3 steps to your right, 2 steps backwards, 3 steps to your left, 2 steps forward, and 3 steps to your left. Perform 3 times.
+9. "Tight Rope" or tandem walk forward 10 steps. Perform 3 times.`,
     keyPoints: [
-      "Two grab bars in the bathroom, anchored into studs, is the single highest-evidence home change.",
-      "Pick up throw rugs and tape down cords — this afternoon, every room.",
-      "Replace one worst pair of shoes with a firm-sole, low-heel, non-slip pair.",
-      "Two phone calls: comprehensive eye exam and a brown-bag pharmacist review.",
-      "Start the five-minute daily balance routine tomorrow morning.",
+      "Balance is the body's primary defense against falling, and well-designed balance programs are the gold standard in fall prevention.",
+      "Consistent practice of even a limited number of balance exercises increases stability and lowers fall risk.",
+      "Choose the program level that matches your current balance and fall-risk level, and progress upward as you improve.",
+      "Always follow the specific safety recommendations that precede each program.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ===== WHAT IF A FALL HAPPENS =====
+  {
+    slug: "minimizing-fall-injury-risk",
+    title: "Minimizing the Risk of a Fall-Related Injury",
+    subtitle: "Building stronger bones and knowing how to fall",
+    order: 30,
+    planSection: "fall_response",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:How to fall to reduce the risk of injury",
+    body: `## What if a Fall Happens
+
+Falls are typically sudden and startling events that often leave the faller stunned and scared. Unfortunately, even with careful planning and attention to safety, falls can happen. Since preventing every fall is impossible, knowing how to reduce fall related injury risk, react immediately after a fall occurs, stand up safely from the ground, and manage any post fall fears is important. The following guidelines outline the best strategies to handle each of these problems.
+
+## Minimizing the Risk of a Fall-Related Injury
+
+CDC statistics reveal that 37% of falls result in an injury that limits activity for at least one day and 20% of falls result in an injury that requires hospitalization. Knowing how to minimize the risk of a fall related injury is therefore critical as it could mean the difference between a minor injury or bruised ego and a serious injury that requires surgery or even nursing home placement.
+
+Reducing the risk of a fall related injury needs to be considered from both short term and long-term perspectives. Here are the strategies recommended to reduce the risk of both types of fall related injuries:
+
+**Reducing the risk of a fall related injury from a long term perspective focuses on building stronger bones. To do this, follow these tips:**
+
+- Get adequate calcium and vitamin D. Guidelines set forth by the Mayo Clinic recommend that senior adults get 1200 milligrams of calcium and 800–1000 IU of Vitamin D per day.
+- Stay active, getting at least one hundred fifty minutes of exercise weekly.
+- Quit smoking.
+- Limit alcohol consumption.
+- Maintain a healthy body weight.
+- Talk to your doctor about osteoporosis.
+
+**Reducing the immediate risk of a fall related injury involves knowing how to fall. To do this, use these tips:**
+
+If you feel yourself beginning to fall...
+
+- Steer your body away from hard furniture, sharp objects, or hard floors.
+- Aim to land on softer body parts, like your bottom.
+- Instead of using your arms to break the fall, turn your body and shield your head with your arms.
+- Relax your body as you fall, going limp and rolling naturally upon impact with the ground.
+
+![Someone bewildered after a fall, trying to assess their situation]()`,
+    keyPoints: [
+      "37% of falls cause an injury that limits activity for at least a day; 20% require hospitalization.",
+      "Build stronger bones long-term: adequate calcium (1200 mg) and vitamin D (800–1000 IU) daily, 150 minutes of weekly exercise, no smoking, limited alcohol, a healthy weight, and talk to your doctor about osteoporosis.",
+      "If you feel yourself falling: steer away from hard objects, aim to land on softer parts like your bottom, shield your head with your arms, and relax and go limp on impact.",
     ],
     comingSoon: false,
     freeTier: false,
     printable: true,
   },
   {
-    slug: "appendix-a-printable-worksheets",
-    title: "Appendix A — Printable Worksheets",
-    subtitle: "Every worksheet in one place",
-    order: 30,
+    slug: "react-after-a-fall",
+    title: "How to React Immediately After a Fall",
+    subtitle: "The first steps that protect you",
+    order: 31,
+    planSection: "fall_response",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:How to react immediately after a fall",
+    body: `Responding appropriately to a fall is vital. It reduces the risk of a sustained injury worsening, improves recovery chances, and reduces long-term damage risk.
+
+If you fall, follow these steps:
+
+1. Stay calm, take deep breaths, and check for injuries.
+2. If possible, slide or crawl to a nearby chair or couch to help you stand.
+3. If seriously injured, don't try to stand; call for help instead.
+4. If you can't get up or are seriously injured, crawl or slide to a phone and call 911.
+
+![Someone on the ground, calmly assessing their situation]()`,
+    keyPoints: [
+      "Stay calm, breathe, and check for injuries before moving.",
+      "If you can, slide or crawl to a sturdy chair or couch to help you stand.",
+      "If seriously injured, don't try to stand — call for help, or crawl/slide to a phone and call 911.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+  {
+    slug: "standing-up-after-a-fall",
+    title: "Standing Up from the Ground After a Fall",
+    subtitle: "Two proven methods",
+    order: 32,
+    planSection: "fall_response",
+    durationMin: null,
+    videoEmbedUrl: "placeholder:vimeo:How to get up from the ground after a fall (two methods)",
+    body: `Standing up from the ground can be challenging for older adults, especially after a fall. Here are two proven methods to get up:
+
+## Crawling Method
+
+1. Roll onto your side.
+2. Push up onto your hands and knees into a crawling position.
+3. Crawl to a sturdy chair, coffee table, or couch.
+4. Place your hands on the furniture, extend your stronger leg, and push into a half-lunge to stand.
+
+If standing fully is difficult, turn and sit on the furniture. If knee pain prevents crawling, scoot on your bottom or roll to the furniture.
+
+## Using a Nearby Surface
+
+1. Scoot close to a staircase, coffee table, chair, or sofa.
+2. Push into a seated position using your hands on the floor.
+3. Turn so your back faces the furniture.
+4. Lift your bottom onto the surface. If using a staircase, sit on the lowest step and move up step by step until you can stand.`,
+    keyPoints: [
+      "Crawling method: roll to your side, get onto hands and knees, crawl to sturdy furniture, then push up through your stronger leg into a half-lunge to stand.",
+      "Using a nearby surface: scoot to furniture, push to sitting, turn your back to it, and lift your bottom onto the surface (or up a staircase step by step).",
+      "If knee pain prevents crawling, scoot on your bottom or roll to the furniture.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+  {
+    slug: "overcoming-fear-of-falling",
+    title: "Overcoming the Fear of Falling",
+    subtitle: "A serious, often-overlooked problem",
+    order: 33,
+    planSection: "fall_response",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `The fear of falling is a very serious, but often overlooked problem for senior adults. It affects over 50% of people who have fallen in the past and more than 30% of the general senior adult population. If unaddressed, the fear of falling can lead to decreased participation in normal daily activity, social isolation, depression, physical decline, and ultimately increased fall risk.
+
+To overcome the fear of falling, follow these steps:
+
+1. Discuss the problem with your physician and/or those closest to you to determine any obvious cause.
+2. Remove or discontinue anything that may be causing a fear of falling.
+3. Resume activity as quickly as possible, starting with safe activities to build confidence if needed and then gradually increasing their intensity as you are able.
+
+![Someone looking fearful about walking]()
+
+![Someone self-isolating at home]()`,
+    keyPoints: [
+      "Fear of falling affects over 50% of people who have fallen and more than 30% of seniors overall.",
+      "Left unaddressed it leads to less activity, social isolation, depression, physical decline, and higher fall risk.",
+      "To overcome it: discuss the cause with your physician and loved ones, remove what's driving it, and resume activity gradually — starting safe and building confidence.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+  {
+    slug: "falls-as-warning-sign",
+    title: "When Falls Are a Warning Sign of an Underlying Health Problem",
+    subtitle: "When to seek a medical evaluation",
+    order: 34,
+    planSection: "fall_response",
+    durationMin: null,
+    videoEmbedUrl: null,
+    body: `Impaired balance and falling can actually be a warning sign of an underlying health issue. If falls occur in the presence of other physical conditions such as persistent pain, swelling, shortness of breath, lethargy, or dizziness, a medical evaluation should be performed. Pain can signal tissue injury or joint damage; Dizziness can be due to dehydration, adverse medication side effects, vestibular system disorders or extremes in blood pressure and sugar levels; Swelling can be a result of tissue injury or problems with the heart, kidney, and lymphatic systems; Lethargy is often caused by infection or electrolyte imbalance; and Shortness of Breath can be a result of heart or lung problems.
+
+If balance problems or falls appear to be associated with a physical condition such as persistent pain, swelling, shortness of breath, lethargy or dizziness, a medical assessment is strongly recommended to rule out an underlying health problem.
+
+![Someone talking with their doctor]()`,
+    keyPoints: [
+      "Falls and balance problems can be a warning sign of an underlying health issue.",
+      "Seek a medical evaluation if falls come with persistent pain, swelling, shortness of breath, lethargy, or dizziness.",
+      "These symptoms can point to injury, dehydration, medication effects, vestibular disorders, or heart, lung, kidney, or other problems.",
+    ],
+    comingSoon: false,
+    freeTier: false,
+    printable: true,
+  },
+
+  // ===== APPENDIX A: ASSISTIVE DEVICES =====
+  {
+    slug: "appendix-assistive-devices",
+    title: "Appendix A: Assistive Devices",
+    subtitle: "Recommended canes, walkers, and wheelchairs with ordering links",
+    order: 40,
     planSection: "appendix_a",
     durationMin: null,
     videoEmbedUrl: null,
-    body: `## The full library of printables
+    body: `Assistive Devices play a vital role in fall prevention, however to maximize their benefit, it is essential to select the device that most closely matches your balance impairment level, body type, and specific needs. Presented below is a detailed breakdown of the four basic assistive device categories and their most common variations. Each item includes ordering instructions and a discount code if you decide the product is right for you.
 
-Every worksheet, checklist, and tracking sheet referenced across the program is collected here so you can find them in one place. Download what you need and keep a binder if it helps — many members do.
+## I. Canes
 
-### Assessment
+*Suitable for people with mild balance problems.*
 
-- **Fall Risk Self-Assessment** — the 12-question screen used in Module 1.
-- **Home Hazard Walkthrough Checklist** — the room-by-room list from Module 8.
-- **Medication List Template** — the brown-bag form to bring to your pharmacist (Module 5).
+- **Single Point Cane** — <https://a.co/d/0ee4m4Rv>
+- **Tripod Cane or Hurry-Cane** — equipped with a wider base, providing more stability and allowing the assistive device to stand on its own to decrease loss when the user is stationary. <https://a.co/d/0g8EWv9Z>
+- **Foldable Cane** — can be folded into a compact size, making it easy to store and travel friendly. <https://a.co/d/03y80pLw>
+- **Quad Cane** — very wide and stable base; designed to accommodate people with marked balance deficits and functional use of only one arm. <https://a.co/d/04M5u4r7>
 
-### Daily and weekly practice
+![Pictures of each cane type]()
 
-- **Five-Minute Balance Routine Tracker** — Module 2.
-- **Strength Training Log** — Module 3 (sit-to-stand, calf raises, wall squat).
-- **Weekly Home Safety Walk-Through** — a short Sunday-evening checklist.
+## II. 4 Wheel Rolling Walker (Rollator)
 
-### Reference cards
+*Suitable for people with mild to moderate balance problems; often also used by people with moderate+ balance problems who are still able to maintain an upright standing posture.*
 
-- **Footwear Five-Feature Checklist** — Module 6, the card to take shopping.
-- **Get-Up Sequence Card** — the six-step technique from Module 9, designed to be taped to the inside of a closet door.
-- **Daily Hydration and Protein Targets** — Module 7.
+- **4 Wheel Rolling Walker (Rollator) — Base model** — <https://a.co/d/0ic8Lbez>
+- **4 Wheel Rolling Walker (Rollator) — Better Quality** — <https://a.co/d/0euwFz2D>
+- **Junior 4 Wheel Rolling Walker (Rollator)** — designed for someone of shorter stature, 4'10" to 5'4". <https://a.co/d/08qUjdhJ> · <https://a.co/d/0i232mg8>
+- **Tall 4 Wheel Rolling Walker (Rollator)** — designed for someone 6' tall and greater. <https://a.co/d/0481gkbz>
+- **Light 4 Wheel Rolling Walker** — good for travel in the community where frequent collapsing, loading, and unloading the walker into a car is necessary. Weighs 11–12 pounds. <https://a.co/d/0eQ5dETK>
+- **Ultra Light Walker** — designed specifically for ease of travel. Folds quickly into a very compact size and weighs only 9.5 pounds (4 Wheel Rolling) or 7 pounds (2 Wheel Rolling with back leg and skis). <https://a.co/d/05SbMsOl> · <https://a.co/d/0cmGHhrC>
+- **Three-Wheel Rolling Walker** — users often report its design makes it easier to navigate areas with limited space. Note: this model lacks a seat and is therefore not a good option for someone with poor endurance. <https://a.co/d/0iFtSTMm>
+- **Bariatric Four Wheel Rolling Walker** — designed to accommodate people of excess weight. <https://a.co/d/00550hkv>
+- **Upright Walker** — designed to assist in maintaining an upright standing posture. Note: users frequently report difficulty managing tall height. <https://a.co/d/06d53rZB>
 
-### For family and caregivers
+![Pictures of each 4-wheel rolling walker variation]()
 
-- **Conversation Starter — Talking to a Parent About Falls** — for adult children who have noticed concerns.
-- **Caregiver Home Walkthrough** — the Module 8 checklist annotated for a visiting family member.
+## III. 2 Wheel Rolling Walker
 
-## How to use the printables
+*Suitable for people with a moderate to moderate+ balance deficit. Provides increased stability.*
 
-Click any worksheet to download a print-ready PDF. We recommend printing on regular paper and keeping them in a single folder. The tracking sheets work best on the fridge, on a clipboard by your favorite chair, or anywhere you will actually see them.
+- **2 Wheel Rolling Walker (Rollator)** — <https://a.co/d/0dv8MLgf> · Recommended for use with walker skis for improved safety negotiating the environment: <https://a.co/d/06h7S4Ww>
 
-If a worksheet refers to a module you have not done yet, save it for when you get there — going through them in order makes the most sense.`,
+![Picture of a 2-wheel rolling walker]()
+
+## IV. Wheelchair
+
+*Suitable for people with a significant balance problem.*
+
+- **Regular Wheelchair** — designed for long-term use. Not easy to transport. Appropriate wheelchair fitting is essential for ease of use. Models come in 16, 18, 20, 22, and 24 inch widths. <https://a.co/d/0iAO9Gll>
+- **Transport Wheelchair** — designed to assist balance- and/or endurance-compromised people when traveling in the community. Lightweight design makes it easy to transport. Not designed for long-term use. <https://a.co/d/092SG19U>
+
+![Pictures of the wheelchairs]()`,
     keyPoints: [
-      "Every worksheet from the program collected in one place for easy printing.",
-      "Tracking sheets work best when they are visible — fridge, clipboard, closet door.",
-      "Family-facing handouts make it easier to have the harder conversations.",
+      "Select the device that most closely matches your balance impairment level, body type, and specific needs.",
+      "Four basic categories: canes (mild), 4-wheel rolling walkers (mild–moderate), 2-wheel rolling walkers (moderate to moderate+), and wheelchairs (significant deficits).",
+      "Each category has variations (junior, tall, bariatric, lightweight, ultra light, large-wheel, transport) for specific needs.",
+      "Each item links to a recommended product for ordering.",
     ],
     comingSoon: false,
     freeTier: false,
     printable: true,
   },
+
+  // ===== APPENDIX B: HOME SAFETY MODIFICATIONS AND EQUIPMENT =====
   {
-    slug: "appendix-b-resources",
-    title: "Appendix B — Resources & Further Reading",
-    subtitle: "Trusted books, sites, and organizations",
-    order: 31,
+    slug: "appendix-home-safety",
+    title: "Appendix B: Home Safety Modifications & Equipment",
+    subtitle: "A room-by-room equipment guide with ordering links",
+    order: 41,
     planSection: "appendix_b",
     durationMin: null,
     videoEmbedUrl: null,
-    body: `## Trusted resources for further reading
+    body: `Maximizing the safety of the home environment is one of the best strategies to prevent falls, however knowing which products would be the most beneficial can be confusing. This section provides a room-by-room outline and description of the most common products and methods used to decrease the risk of falls in the home. Pictures of each piece of equipment are given and instructions and a discount code for ordering are provided.
 
-The materials below are sources we trust and return to. They are not affiliate links; we do not earn anything from any of them.
+## The Bathroom
 
-### National organizations
+- **Slip Resistant Bathtub Rug / Mat** — place a slip resistant rug or mat next to the bathtub/shower when bathing to improve safety during entry and exit. <https://a.co/d/0alvBwRp>
+- **Non-Skid Strips / Bath Mat** — use non-skid strips or a bath mat on the bathtub/shower floor to prevent slipping while bathing. Non-Skid Strips: <https://a.co/d/0d9xWkRZ> · Bath Mat: <https://a.co/d/0fjlndpN>
+- **Grab Bars** — install grab bars in and around the bathtub/shower for improved standing balance. Grab bars should be mounted at a height just above waist level and in such a way that creates an almost continuous support surface starting outside the bathtub/shower and continuing throughout the entire bathing area. Towel racks and suction cup style grab bars should not be considered an adequate replacement for properly mounted grab bars. <https://a.co/d/07qqw31i>
+- **Shower Chair with Back and Arms** — use in the bathtub/shower if standing balance or endurance is significantly compromised. Provides a safe sitting surface to perform bathing needs, is easy to stand up and down from, and when used in combination with grab bars, creates a very safe bathing area. <https://a.co/d/008u5Gxx>
+- **Tub Bench** — use if stepping over the bathtub wall or shower is unsafe. The bather sits down on the tub bench outside of the bathtub/shower, then scoots across the bench into the bathing area. <https://a.co/d/01uC1RpB>
+- **Modified Shower Curtain** — used with a tub bench to limit the amount of water that escapes the bathing area. <https://a.co/d/02eyVte7>
+- **Tub Bench with a Sliding and Pivoting Seat** — a variation to the basic tub bench. Used if the bather is not strong enough to scoot across the elongated tub bench seat into the bathtub/shower, or does not possess adequate postural control to sit unsupported when scooting or bathing. The bather sits down on the seat outside of the bathing area, buckles in, pivots the chair direction, and then slides into the bathing area. <https://a.co/d/0deJQVQl>
+- **Modified Toilet Seats** — use if standing up or down from a toilet is difficult or unsafe. There are multiple designs, each with their own use case:
+  - **Versa Frame** — adds arms to a toilet, providing a stable surface to grasp when sitting down and to push up from when standing. Recommended when the toilet height is adequate but use of arms is needed to sit or stand safely. <https://a.co/d/0cgRcoED>
+  - **Raised Toilet Seat with Arms** — adds arms and extra height to the toilet; used when the toilet is too low and use of arms is needed to stand. <https://a.co/d/03ubjpRV>
+  - **Three in One Commode** — provides arms to assist with standing up or sitting down, has an adjustable toilet seat height, is portable, and certain designs are more accommodating to larger people. Used when the existing toilet is too low, use of arms is needed to safely stand or sit, other modified toilet seats are too confining, and/or the unit needs to be used in multiple locations or for multiple purposes (at bedside for nighttime toileting needs or in the shower/bathtub as a shower chair). <https://a.co/d/0hMYMIIM>
 
-- **National Council on Aging — Falls Free CheckUp.** A free 12-question online screening that mirrors the assessment used in Module 1.
-- **CDC STEADI Initiative** (Stopping Elderly Accidents, Deaths & Injuries). The clinical toolkit that primary-care doctors use. The patient-facing brochures are excellent.
-- **National Institute on Aging.** Their fall prevention page is plainspoken and accurate.
-- **American Geriatrics Society.** The professional society's HealthInAging.org site has well-edited articles on medications, exercise, and home safety.
+![Pictures of each bathroom product, including a diagram of the shower area showing grab bar positions]()
 
-### Books
+## The Bedroom
 
-- *Stronger After 60* — a practical, encouraging book on resistance training in later life.
-- *Tai Chi for Beginners* (Dr. Paul Lam) — the most widely studied Tai Chi program for fall prevention.
-- *Better Balance for Life* — an eight-week balance program that aligns closely with Module 2.
+- **Designated Dressing Area** — create a designated dressing area in the bedroom or bathroom. Furnish it with a heavy chair with arms to sit on and a solid surface to hold onto when standing.
+- **Adjust Bed Height** — beds that are either too tall or too short make getting in or out of bed difficult and dangerous. Optimum bed heights range between 18–23 inches when the mattress is sat on by an average height male or female. Beds can be lowered by replacing the traditional box spring with a reduced height box spring and raised by using furniture risers. If using furniture risers, make sure the inside base of the riser is large enough to accommodate the foot of the bed frame. Using a stool to get in and out of a tall bed, even if it has a built-in handrail, is not recommended. Reduced height box spring: <https://a.co/d/0eO8x7fV> · Furniture Riser (2 inch size shown): <https://a.co/d/05Dku18o>
+- **Bed Rail** — use if getting in/out of bed is difficult, if safety during sitting or standing at the bed is compromised, or if rolling out of bed is possible. Bed rails secure to the bed frame or under the mattress and provide an easy-to-grasp support surface. <https://a.co/d/0gJXxjca>
+- **Super Pole** — a good alternative to a bed rail. <https://a.co/d/07IG3EPp>
 
-### Videos and classes (outside this program)
+![Pictures of bedroom equipment]()
 
-- **Tai Chi: Moving for Better Balance** — community classes are offered through many local Area Agencies on Aging at low or no cost.
-- **A Matter of Balance** — an eight-week group program developed at Boston University, widely available through senior centers.
-- **Otago Exercise Program** — the strength-and-balance program with the strongest evidence base for at-home use. A physical therapist can teach it in 4–6 sessions.
+## The Stairway
 
-### Finding local help
+- **Hand Rails** — install on one or both sides of the staircase for better support.
+- **Contrasting Colored Tape** — mark stair edges with contrasting colored tape if visual impairments limit the ability to identify the stair edge. <https://a.co/d/0iS7KRUE>
+- **Mechanical Stair Lift** — use if going up/down stairs is significantly difficult or dangerous. <https://a.co/d/00QNdZUO>
 
-- **Area Agency on Aging.** Every county has one. They are an underused gateway to home modification grants, transportation, exercise classes, and caregiver support. Call 1-800-677-1116 to find yours.
-- **Eldercare Locator.** The companion website to the number above.
-- **Your state's Aging and Disability Resource Center** — searchable by zip code.
+![Pictures of stairway equipment]()
 
-### When you need a professional
+## The Living Room / Den
 
-- **Physical therapist specializing in geriatrics.** Ask for one with the GCS (Geriatric Clinical Specialist) credential. A few sessions can be transformative.
-- **Occupational therapist.** Especially helpful for home safety assessments and adaptive equipment.
-- **Geriatric care manager.** A private professional (usually a nurse or social worker) who can coordinate care, especially helpful for families managing care from a distance.
+- **Furniture Risers** — use to elevate chairs and couches that are low and difficult to stand up from. Optimum sitting surface height is 18–22 inches when the surface is sat on, maximizing the combination of sitting comfort and ease of standing. Furniture risers come in multiple heights and should be selected to accommodate a person's individual need. Furniture Riser (2 inch size shown): <https://a.co/d/05Dku18o>
+- **Recliner Chair Riser Base** — use to increase the height of a recliner chair if standing up/down is difficult. <https://a.co/d/0ehAz0jn>
+- **Elevating Recliner Chair** — use if standing up/down requires assistance. Elevating recliner chairs should only be used if standing up is markedly difficult or unsafe. For people with poor sitting balance and/or trunk control, choose a non-slick covering material such as a knit fabric to minimize the risk of sliding out of the chair when it is in the raised position. <https://www.la-z-boy.com/b/living-room/recliners/power-lift-chairs> · <https://a.co/d/0eoOFpXR>
 
-## A final word
-
-Use this program as a foundation, not a ceiling. The more you learn from the sources above and the more you bring back to your live classes and concierge calls, the better the plan will fit your life.`,
+![Pictures of living room equipment]()`,
     keyPoints: [
-      "The CDC STEADI initiative and the NCOA Falls Free CheckUp are the best free starting points.",
-      "Your local Area Agency on Aging (1-800-677-1116) is the underused gateway to local help.",
-      "A few sessions with a geriatric physical therapist can be transformative.",
-      "Tai Chi and the Otago program have the strongest evidence base of any outside programs.",
+      "Maximizing home safety is one of the best strategies to prevent falls — this is a room-by-room equipment guide.",
+      "Bathroom: slip-resistant mats, non-skid strips, properly mounted grab bars, shower chairs, tub benches, and modified toilet seats.",
+      "Bedroom: a designated dressing area, correct bed height (18–23 inches when sat on), and bed rails or a super pole.",
+      "Stairway and living areas: handrails, contrasting stair-edge tape, stair lifts, furniture risers, and lift recliners — each with an ordering link.",
     ],
     comingSoon: false,
     freeTier: false,
@@ -752,63 +1159,66 @@ function daysFromNow(d: number, hour = 10): Date {
   return x;
 }
 
+// Tier 2 (subscription) includes regular exercise classes and a weekly Q&A.
+// Geoff's classes are recorded so members can follow along anytime (he did NOT
+// want them framed as "live"). Representative upcoming/recurring sessions.
 const SESSIONS = [
   {
     kind: "class",
-    title: "Live Balance Class with Dr. Hennessy",
+    title: "Balance Class",
     description:
-      "A guided 45-minute session of seated and standing balance work. Suitable for all levels. Camera optional.",
-    startsAt: daysFromNow(3, 10),
+      "A guided session working through the Fall Prevention Plan balance programs. Suitable for all levels — follow along at your own program level. Camera optional.",
+    startsAt: daysFromNow(1, 10),
     durationMin: 45,
-    host: "Dr. Anna Hennessy, DPT",
+    host: "Dr. Geoff Angell, DPT",
     joinUrl: "stub://zoom/balance-class",
   },
   {
-    kind: "qa",
-    title: "Members Q&A — Medications and Dizziness",
+    kind: "class",
+    title: "Strength Class",
     description:
-      "Bring your medication list. Bring your questions. Pharmacist Tom Reyes will join us for the full hour.",
-    startsAt: daysFromNow(6, 13),
-    durationMin: 60,
-    host: "Tom Reyes, PharmD",
-    joinUrl: "stub://zoom/qa-meds",
+      "A guided strength session based on the Home Exercise Programs — strength, flexibility, and endurance for fall prevention.",
+    startsAt: daysFromNow(2, 10),
+    durationMin: 45,
+    host: "Dr. Geoff Angell, DPT",
+    joinUrl: "stub://zoom/strength-class",
   },
   {
-    kind: "class",
-    title: "Home Walkthrough — What to Look For",
+    kind: "qa",
+    title: "Weekly Members Q&A",
     description:
-      "A camera-on session where we walk through a real apartment together and spot hazards in real time.",
-    startsAt: daysFromNow(10, 11),
-    durationMin: 45,
-    host: "Marian Holloway, RN",
-    joinUrl: "stub://zoom/home-walkthrough",
+      "Bring your questions about any step of the plan — footwear, medications, home safety, exercises, and more.",
+    startsAt: daysFromNow(4, 13),
+    durationMin: 60,
+    host: "Dr. Geoff Angell, DPT",
+    joinUrl: "stub://zoom/weekly-qa",
   },
 ];
 
 const LIBRARY = [
   {
-    title: "Recording — Last Month's Balance Class",
+    title: "Recording — Balance Class",
     kind: "recording",
     summary:
-      "If you missed the live session in April, the full recording is here. Skip ahead with chapter markers.",
-    publishedAt: daysFromNow(-12, 10),
-    durationMin: 47,
+      "Missed the balance class? The full recording is available here to follow along anytime.",
+    publishedAt: daysFromNow(-7, 10),
+    durationMin: 45,
   },
   {
-    title: "Article — Why Bifocals Cause Falls (and What to Do)",
-    kind: "article",
+    title: "Recording — Strength Class",
+    kind: "recording",
     summary:
-      "A short, practical piece on how progressive lenses distort your view of stairs, and the simple two-glasses trick that helps.",
-    publishedAt: daysFromNow(-21, 9),
-    durationMin: 6,
+      "A recorded strength session based on the Home Exercise Programs, ready to follow along with at home.",
+    publishedAt: daysFromNow(-5, 10),
+    durationMin: 45,
   },
   {
-    title: "Interview — A Conversation with Dr. Steven Wolf",
-    kind: "interview",
+    title: "Recording — Members Q&A",
+    kind: "recording",
     summary:
-      "Dr. Wolf, one of the country's leading researchers on Tai Chi for fall prevention, joins us for a long-form conversation about what actually works.",
-    publishedAt: daysFromNow(-34, 14),
-    durationMin: 38,
+      "A recording of a recent members Q&A covering medications, footwear, and home safety questions.",
+    publishedAt: daysFromNow(-3, 13),
+    durationMin: 60,
   },
 ];
 
@@ -895,19 +1305,19 @@ async function main() {
       });
       await db.insert(conciergeCheckInsTable).values({
         userId: u.id,
-        fromName: "Marian Holloway, RN",
+        fromName: "Dr. Geoff Angell, DPT",
         message:
-          "Checking in after our home walkthrough — how did installing the bathroom grab bar go? Let me know if you'd like help finding a handyman.",
+          "Checking in after our home walkthrough — how did installing the bathroom grab bars go? Let me know if you'd like help finding a handyman.",
       });
       await db.insert(conciergeNotesTable).values({
         userId: u.id,
-        authorName: "Marian Holloway, RN",
+        authorName: "Dr. Geoff Angell, DPT",
         body: "Completed initial intake call. Member's daughter joined. Identified bathroom and bedside lighting as top priorities.",
       });
       await db.insert(conciergeNotesTable).values({
         userId: u.id,
-        authorName: "Marian Holloway, RN",
-        body: "Scheduled medication review with Tom Reyes for next week.",
+        authorName: "Dr. Geoff Angell, DPT",
+        body: "Reviewed the TUG self-assessment result and recommended starting the Level 3 balance program.",
       });
     }
   }

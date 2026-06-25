@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { DemoAuthProvider, useDemoAuth } from "./lib/demoAuth";
+import { AccessibilityProvider } from "./lib/accessibility";
 
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
@@ -30,6 +31,7 @@ const AdminCourses = lazy(() => import("./pages/admin/courses").then((m) => ({ d
 const AdminMembers = lazy(() => import("./pages/admin/members").then((m) => ({ default: m.AdminMembers })));
 const AdminCourseEditor = lazy(() => import("./pages/admin/course-editor").then((m) => ({ default: m.AdminCourseEditor })));
 const AuthPage = lazy(() => import("./pages/auth").then((m) => ({ default: m.AuthPage })));
+const Onboarding = lazy(() => import("./pages/onboarding").then((m) => ({ default: m.Onboarding })));
 const NotFound = lazy(() => import("./pages/not-found"));
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -57,7 +59,7 @@ function PageFallback() {
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-[100dvh]">
+    <div className="app-shell flex flex-col min-h-[100dvh]">
       <Header />
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer />
@@ -73,6 +75,7 @@ function AppRoutes() {
           <Route path="/" component={HomeRedirect} />
           <Route path="/sign-in" component={SignInPage} />
           <Route path="/sign-up" component={SignUpPage} />
+          <Route path="/onboarding" component={Onboarding} />
 
           {/* Public Pages */}
           <Route path="/about" component={About} />
@@ -106,10 +109,12 @@ function App() {
   return (
     <WouterRouter base={basePath}>
       <QueryClientProvider client={queryClient}>
-        <DemoAuthProvider>
-          <AppRoutes />
-          <Toaster />
-        </DemoAuthProvider>
+        <AccessibilityProvider>
+          <DemoAuthProvider>
+            <AppRoutes />
+            <Toaster />
+          </DemoAuthProvider>
+        </AccessibilityProvider>
       </QueryClientProvider>
     </WouterRouter>
   );

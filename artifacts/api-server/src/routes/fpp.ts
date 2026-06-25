@@ -141,7 +141,14 @@ router.get("/modules", async (req, res): Promise<void> => {
     title: m.title,
     subtitle: m.subtitle,
     order: m.order,
-    planSection: m.planSection as "intro" | "ten_point" | "five_point" | "appendix_a" | "appendix_b",
+    planSection: m.planSection as
+      | "intro"
+      | "overview"
+      | "assessment"
+      | "ten_point"
+      | "fall_response"
+      | "appendix_a"
+      | "appendix_b",
     durationMin: m.durationMin,
     locked: !unlockedFor(me.tier, m.freeTier),
     comingSoon: m.comingSoon,
@@ -443,8 +450,10 @@ function toAdminModule(row: typeof modulesTable.$inferSelect) {
     order: row.order,
     planSection: row.planSection as
       | "intro"
+      | "overview"
+      | "assessment"
       | "ten_point"
-      | "five_point"
+      | "fall_response"
       | "appendix_a"
       | "appendix_b",
     durationMin: row.durationMin,

@@ -2,13 +2,13 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Info } from "lucide-react";
-import { useGetMe } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useDemoAuth } from "@/lib/demoAuth";
 
 export function Pricing() {
   const [, setLocation] = useLocation();
   const { isSignedIn } = useDemoAuth();
-  const { data: me } = useGetMe({ query: { enabled: isSignedIn } });
+  const { data: me } = useGetMe({ query: { enabled: isSignedIn, queryKey: getGetMeQueryKey() } });
 
   const handleSelectPlan = (plan: string) => {
     if (isSignedIn) {
@@ -93,11 +93,11 @@ export function Pricing() {
                 </li>
                 <li className="flex items-start gap-3 text-lg">
                   <Check className="w-6 h-6 text-primary shrink-0" />
-                  <span>Live Group Exercise Classes (3-5x/week)</span>
+                  <span>Group Exercise Classes (3-5x/week)</span>
                 </li>
                 <li className="flex items-start gap-3 text-lg">
                   <Check className="w-6 h-6 text-primary shrink-0" />
-                  <span>Weekly Live Q&A with Geoff</span>
+                  <span>Weekly Q&A with Geoff</span>
                 </li>
                 <li className="flex items-start gap-3 text-lg">
                   <Check className="w-6 h-6 text-primary shrink-0" />
@@ -156,7 +156,32 @@ export function Pricing() {
           </Card>
         </div>
 
-        <div className="mt-20 max-w-3xl mx-auto bg-muted/50 rounded-2xl p-8 flex items-start gap-6">
+        {/* À la carte consult — available to ANY member, including one-time (Geoff's explicit ask) */}
+        <div className="mt-16 max-w-4xl mx-auto rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 md:p-10 text-center">
+          <h3 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-3">
+            Talk one-on-one with Dr. Angell
+          </h3>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
+            Need personal advice — like which assistive device is right for you? Book a private
+            consultation with Dr. Angell. Available to <strong>any member</strong>, including
+            one-time members — no subscription required.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <div className="rounded-xl bg-card border border-border px-6 py-4">
+              <p className="font-serif text-3xl font-bold text-primary">$25</p>
+              <p className="text-base text-muted-foreground">15-minute consult</p>
+            </div>
+            <div className="rounded-xl bg-card border border-border px-6 py-4">
+              <p className="font-serif text-3xl font-bold text-primary">$50</p>
+              <p className="text-base text-muted-foreground">30-minute consult</p>
+            </div>
+          </div>
+          <Link href="/contact">
+            <Button className="min-h-[56px] px-8 text-lg rounded-full font-bold">Request a consult</Button>
+          </Link>
+        </div>
+
+        <div className="mt-12 max-w-3xl mx-auto bg-muted/50 rounded-2xl p-8 flex items-start gap-6">
           <Info className="w-8 h-8 text-primary shrink-0 mt-1" />
           <div>
             <h4 className="font-serif text-xl font-bold mb-2">Have a question before joining?</h4>

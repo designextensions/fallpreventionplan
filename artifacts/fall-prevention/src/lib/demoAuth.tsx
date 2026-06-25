@@ -38,15 +38,23 @@ function encodeToken(user: DemoUser): string {
 
 const DemoAuthContext = createContext<DemoAuthContextValue | null>(null);
 
+// Keep the active identity at module scope and register the token getter ONCE,
+// synchronously at import time. React runs a child component's query effect
+// BEFORE an ancestor provider's effect, so registering the getter inside the
+// provider's effect let the very first /me and /modules requests go out as a
+// guest (and get cached), which made gated pages look locked for real members
+// on a fresh load. Registering here guarantees the Authorization header is
+// attached from the first request.
+let activeUser: DemoUser | null = readStored();
+setAuthTokenGetter(() => (activeUser ? encodeToken(activeUser) : null));
+
 export function DemoAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<DemoUser | null>(() => readStored());
   const queryClient = useQueryClient();
 
-  // Register the token getter so the api-client attaches the demo identity
-  // to every request as a Bearer token.
+  // Keep the module-level identity in sync with React state.
   useEffect(() => {
-    setAuthTokenGetter(() => (user ? encodeToken(user) : null));
-    return () => setAuthTokenGetter(null);
+    activeUser = user;
   }, [user]);
 
   const signIn = useCallback((next: DemoUser) => {
@@ -55,6 +63,7 @@ export function DemoAuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
+    activeUser = next; // update token source before the cache is cleared/refetched
     setUser(next);
     queryClient.clear();
   }, [queryClient]);
@@ -65,6 +74,7 @@ export function DemoAuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
+    activeUser = null;
     setUser(null);
     queryClient.clear();
   }, [queryClient]);

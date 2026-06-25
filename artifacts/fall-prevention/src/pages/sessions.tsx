@@ -38,9 +38,9 @@ function SessionsContent() {
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <Video className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="font-serif text-2xl font-bold mb-3">Live Sessions</h2>
+            <h2 className="font-serif text-2xl font-bold mb-3">Classes</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Live group exercise classes and weekly Q&A sessions are available on the Community Plus plan.
+              Group exercise classes and weekly Q&A sessions are available on the Community Plus plan.
             </p>
             <Button className="w-full min-h-[56px] text-lg rounded-full font-bold">Upgrade Plan</Button>
           </CardContent>
@@ -54,8 +54,8 @@ function SessionsContent() {
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
           <div>
-            <h1 className="font-serif text-4xl font-bold text-primary mb-2">Live Sessions</h1>
-            <p className="text-xl text-muted-foreground">Join our community for guided exercises and live Q&A.</p>
+            <h1 className="font-serif text-4xl font-bold text-primary mb-2">Classes</h1>
+            <p className="text-xl text-muted-foreground">Join our community for guided exercise classes and weekly Q&A.</p>
           </div>
           <Button variant="outline" className="min-h-[48px] rounded-full flex items-center gap-2">
             <Calendar className="w-4 h-4" /> Sync to my Calendar

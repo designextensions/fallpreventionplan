@@ -70,7 +70,7 @@
 
 /* LIGHT MODE */
 :root {
-  --button-outline: rgba(0,0,0, .10);
+  --button-outline: rgba(0,0,0, .42);
   --badge-outline: rgba(0,0,0, .05);
 
   /* Automatic computation of border around primary / danger buttons */
@@ -83,8 +83,8 @@
   /* Warm Cream */
   --background: 40 33% 98%;
   --foreground: 210 20% 20%;
-  
-  --border: 40 20% 85%;
+
+  --border: 40 16% 78%;
   
   --card: 0 0% 100%;
   --card-foreground: 210 20% 20%;
@@ -107,21 +107,23 @@
   --primary: 210 50% 30%;
   --primary-foreground: 40 33% 98%;
 
-  /* Muted Sage */
-  --secondary: 120 20% 50%;
+  /* Muted Sage (darkened so white text and text-on-cream meet WCAG AA) */
+  --secondary: 120 25% 32%;
   --secondary-foreground: 0 0% 100%;
 
   --muted: 40 20% 92%;
-  --muted-foreground: 210 10% 45%;
+  /* Body/secondary copy color — darkened to clear AA on cream and muted bg */
+  --muted-foreground: 210 12% 38%;
 
-  /* Soft Terracotta */
-  --accent: 15 60% 60%;
+  /* Soft Terracotta (darkened so it is legible as a label and behind white text) */
+  --accent: 15 55% 42%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 60% 50%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 40 20% 80%;
+  /* Form-control border — dark enough for the 3:1 non-text contrast minimum */
+  --input: 40 14% 50%;
   --ring: 210 50% 30%;
   
   --chart-1: 210 50% 30%;
@@ -222,15 +224,95 @@
     @apply border-border;
   }
 
+  /* Root font size drives all rem-based Tailwind text utilities, so the
+     large-text accessibility modes scale the WHOLE UI proportionally.
+     112.5% of the 16px browser default = 18px (the senior-friendly base). */
+  html {
+    font-size: var(--fpp-font-size, 112.5%);
+  }
+  html[data-text-scale="large"]  { --fpp-font-size: 125%; }   /* ~20px */
+  html[data-text-scale="xlarge"] { --fpp-font-size: 140%; }   /* ~22.4px */
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-size: 18px; /* Senior-friendly */
+    font-size: 1rem;
     line-height: 1.6;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif text-primary;
   }
+
+  /* Strong, always-visible focus ring for keyboard / low-vision users. */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility modes (toggled by AccessibilityProvider via <html> attrs).
+   --------------------------------------------------------------------------- */
+
+/* High-contrast mode: push text, borders, and controls to maximum legibility. */
+html.a11y-contrast {
+  --background: 0 0% 100%;
+  --foreground: 210 45% 10%;
+  --border: 210 25% 38%;
+  --input: 210 30% 28%;
+  --button-outline: rgba(0, 0, 0, 0.65);
+  --muted: 40 25% 90%;
+  --muted-foreground: 210 25% 24%;
+  --primary: 210 60% 24%;
+  --secondary: 120 35% 22%;
+  --accent: 15 70% 32%;
+  --ring: 210 70% 22%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 45% 10%;
+}
+
+/* Reduce color: desaturate everything. Applied to <body> (not <html>) so it
+   also covers Radix portals (popovers, dropdowns, dialogs, toasts) which mount
+   to document.body — while keeping the sticky header working (sticky, unlike
+   fixed, is unaffected by an ancestor filter). */
+html.a11y-grayscale body {
+  filter: grayscale(1);
+}
+
+/* Reduce motion: honor the OS preference AND an in-app toggle. */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion ::before,
+html.a11y-reduce-motion ::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Readable data grids for the nutrition / medication tables in module bodies. */
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.prose th,
+.prose td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose thead th {
+  background: hsl(var(--muted));
+}
+.prose tbody tr:nth-child(even) {
+  background: hsl(var(--muted) / 0.4);
 }
 
 @layer utilities {

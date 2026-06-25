@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, FileText, Mic, PlayCircle, Lock } from "lucide-react";
+import { Video, FileText, Mic, PlayCircle, Lock, Search } from "lucide-react";
 import { format } from "date-fns";
 import { Spinner } from "@/components/ui/spinner";
-import type { LibraryItemKind } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { LibraryItemKind } from "@workspace/api-client-react";
 
 export function Library() {
   return (
@@ -19,6 +19,7 @@ export function Library() {
 
 function LibraryContent() {
   const [filter, setFilter] = useState<string>("all");
+  const [query, setQuery] = useState("");
   const { data: me } = useGetMe({ query: { queryKey: getGetMeQueryKey() } });
   const { data: items, isLoading } = useListLibraryItems({ query: { queryKey: getListLibraryItemsQueryKey() } });
 
@@ -51,22 +52,47 @@ function LibraryContent() {
     );
   }
 
-  const filteredItems = items?.filter(item => filter === "all" || item.kind === filter) || [];
+  const q = query.trim().toLowerCase();
+  const filteredItems =
+    items?.filter((item) => {
+      const matchesKind = filter === "all" || item.kind === filter;
+      const matchesQuery =
+        q === "" || `${item.title} ${item.summary ?? ""}`.toLowerCase().includes(q);
+      return matchesKind && matchesQuery;
+    }) || [];
 
   const getIcon = (kind: LibraryItemKind) => {
     switch(kind) {
       case "recording": return <Video className="w-5 h-5" />;
       case "article": return <FileText className="w-5 h-5" />;
       case "interview": return <Mic className="w-5 h-5" />;
+      default: return null;
     }
   };
 
   return (
     <div className="flex-1 bg-background py-12 md:py-20">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="mb-12">
+        <div className="mb-8">
           <h1 className="font-serif text-4xl font-bold text-primary mb-2">Resource Library</h1>
           <p className="text-xl text-muted-foreground">Past sessions, clinical articles, and interviews.</p>
+        </div>
+
+        {/* Search the library */}
+        <div className="mb-6 max-w-2xl">
+          <label htmlFor="library-search" className="sr-only">Search the library</label>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" aria-hidden="true" />
+            <input
+              id="library-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search the library…"
+              className="w-full min-h-[60px] pr-4 py-3 text-lg bg-card border-2 border-border rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              style={{ paddingLeft: "3.25rem" }}
+            />
+          </div>
         </div>
 
         <Tabs defaultValue="all" onValueChange={setFilter} className="mb-8">
@@ -104,7 +130,7 @@ function LibraryContent() {
           
           {filteredItems.length === 0 && (
             <div className="col-span-full py-16 text-center text-muted-foreground text-lg">
-              No items found for this category.
+              {q ? `No results for “${query}”.` : "No items found for this category."}
             </div>
           )}
         </div>

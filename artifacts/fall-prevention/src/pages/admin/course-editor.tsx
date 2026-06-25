@@ -27,7 +27,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Save, AlertCircle, CheckCircle2 } from "lucide-react";
 import { AdminShell } from "./AdminShell";
 
-type PlanSection = "intro" | "ten_point" | "five_point" | "appendix_a" | "appendix_b";
+type PlanSection =
+  | "intro"
+  | "overview"
+  | "assessment"
+  | "ten_point"
+  | "fall_response"
+  | "appendix_a"
+  | "appendix_b";
 
 interface FormState {
   slug: string;
@@ -251,7 +258,7 @@ function AdminCourseEditorContent() {
                   id="slug"
                   value={form.slug}
                   onChange={(e) => update("slug", e.target.value)}
-                  placeholder="module-1-understanding-fall-risk"
+                  placeholder="step-1-mindset"
                   required
                   className="font-mono text-sm min-h-[44px]"
                 />
@@ -292,10 +299,12 @@ function AdminCourseEditorContent() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="intro">Introduction</SelectItem>
-                    <SelectItem value="ten_point">10-Point Plan</SelectItem>
-                    <SelectItem value="five_point">5-Point Plan</SelectItem>
-                    <SelectItem value="appendix_a">Appendix A — Worksheets</SelectItem>
-                    <SelectItem value="appendix_b">Appendix B — Resources</SelectItem>
+                    <SelectItem value="overview">Overview of Balance and Falls</SelectItem>
+                    <SelectItem value="assessment">Fall Self-Assessment</SelectItem>
+                    <SelectItem value="ten_point">Personalized Plan (10 Steps)</SelectItem>
+                    <SelectItem value="fall_response">What if a Fall Happens</SelectItem>
+                    <SelectItem value="appendix_a">Appendix A — Assistive Devices</SelectItem>
+                    <SelectItem value="appendix_b">Appendix B — Home Safety</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

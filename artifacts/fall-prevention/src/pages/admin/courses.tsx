@@ -25,13 +25,23 @@ import { AdminShell } from "./AdminShell";
 
 const SECTION_LABELS: Record<string, string> = {
   intro: "Introduction",
-  ten_point: "10-Point Plan",
-  five_point: "5-Point Plan",
-  appendix_a: "Appendix A",
-  appendix_b: "Appendix B",
+  overview: "Overview of Balance and Falls",
+  assessment: "Fall Self-Assessment",
+  ten_point: "Personalized Plan (10 Steps)",
+  fall_response: "What if a Fall Happens",
+  appendix_a: "Appendix A — Assistive Devices",
+  appendix_b: "Appendix B — Home Safety",
 };
 
-const SECTION_ORDER = ["intro", "ten_point", "five_point", "appendix_a", "appendix_b"] as const;
+const SECTION_ORDER = [
+  "intro",
+  "overview",
+  "assessment",
+  "ten_point",
+  "fall_response",
+  "appendix_a",
+  "appendix_b",
+] as const;
 
 export function AdminCourses() {
   return (

@@ -2,7 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <!-- Allow pinch-zoom (do not cap maximum-scale) for low-vision users -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Apply saved accessibility settings before first paint to avoid a flash -->
+    <script>
+      (function () {
+        try {
+          var s = JSON.parse(localStorage.getItem("fpp.a11y") || "{}");
+          var el = document.documentElement;
+          el.setAttribute("data-text-scale", s.textScale || "normal");
+          el.classList.toggle("a11y-contrast", !!s.contrast);
+          el.classList.toggle("a11y-grayscale", !!s.grayscale);
+          el.classList.toggle("a11y-reduce-motion", !!s.reduceMotion);
+        } catch (e) {}
+      })();
+    </script>
     <title>Fall Prevention Plan</title>
     <meta name="description" content="Fall Prevention Plan — built on Replit. Update this description to reflect the app." />
     <meta name="robots" content="index, follow" />

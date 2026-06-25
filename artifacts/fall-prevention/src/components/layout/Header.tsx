@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useGetMe } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,10 +11,11 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Menu } from "lucide-react";
 import { useDemoAuth } from "@/lib/demoAuth";
+import { AccessibilityMenu } from "./AccessibilityMenu";
 
 export function Header() {
   const { isSignedIn, signOut } = useDemoAuth();
-  const { data: me } = useGetMe({ query: { enabled: isSignedIn } });
+  const { data: me } = useGetMe({ query: { enabled: isSignedIn, queryKey: getGetMeQueryKey() } });
   const [, setLocation] = useLocation();
 
   const getInitials = (name?: string | null) => {
@@ -62,7 +63,7 @@ export function Header() {
                 The Plan
               </Link>
               <Link href="/sessions" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
-                Live Sessions
+                Classes
               </Link>
               <Link href="/library" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
                 Library
@@ -81,7 +82,10 @@ export function Header() {
           )}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Always-visible accessibility control (large text, contrast, color, motion) */}
+          <AccessibilityMenu />
+
           {!isSignedIn && (
             <>
               <div className="hidden sm:flex items-center gap-4">
@@ -137,7 +141,7 @@ export function Header() {
                 <div className="md:hidden">
                   <DropdownMenuItem onClick={() => setLocation('/dashboard')} className="min-h-[48px] text-lg">Dashboard</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation('/modules')} className="min-h-[48px] text-lg">The Plan</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocation('/sessions')} className="min-h-[48px] text-lg">Live Sessions</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/sessions')} className="min-h-[48px] text-lg">Classes</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation('/library')} className="min-h-[48px] text-lg">Library</DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </div>

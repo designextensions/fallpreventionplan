@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { CheckoutInputPlan } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { CheckoutInputPlan } from "@workspace/api-client-react";
 
 export function Checkout() {
   return (

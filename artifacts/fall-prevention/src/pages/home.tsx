@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Shield, Activity, Users } from "lucide-react";
+import { CheckCircle2, Shield, Activity, Users, UserRound } from "lucide-react";
 
 export function Home() {
   return (
@@ -39,6 +39,58 @@ export function Home() {
                   View Plans
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Preface — a welcome from the author (Dr. Angell's verbatim preface) */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-start gap-12 max-w-6xl mx-auto">
+            <div className="w-full lg:w-1/3 flex flex-col items-center text-center">
+              {/* Author photo slot — Dr. Angell asks for a picture of the author to
+                  build attachment and trust. Replace with a real photo when available. */}
+              <div className="w-48 h-48 rounded-full border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center mb-4">
+                <UserRound className="w-14 h-14 text-primary/40" />
+                <span className="text-xs text-muted-foreground mt-2 px-4">
+                  Photo of Dr. Geoff Angell, DPT
+                </span>
+              </div>
+              <p className="font-serif text-xl font-bold">Dr. Geoff Angell, DPT</p>
+              <p className="text-muted-foreground">Physical Therapist · Author</p>
+            </div>
+
+            <div className="w-full lg:w-2/3 space-y-5">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold">A welcome from the author</h2>
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                Welcome to the Fall Prevention Plan, a comprehensive guide for decreasing the risk of
+                falls. I am Dr. Geoff Angell, DPT, the author and a physical therapist with over 20
+                years experience in geriatric balance, mobility, and safety, helping seniors live at
+                their highest level of independence.
+              </p>
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                Falls are a major concern for seniors, affecting roughly one in every four people over
+                the age of 65, and often leading to significant life changes. Falls, however, don't
+                have to be such a big problem. Effective and easy-to-implement strategies exist that
+                can significantly reduce their rate of occurrence. Unfortunately, until now, there
+                hasn't been a resource that laid out an all-encompassing plan to stop falls and then
+                took the time to thoroughly explain how to implement each step. There is an abundance
+                of material that focuses on discrete fall prevention methods, but nothing that
+                addresses the subject as a whole.
+              </p>
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                It was for this reason that I created The Fall Prevention Plan. It is an easy to follow,
+                effective, and complete strategy to stop falls that blends proven fall prevention
+                techniques with the clinical experience of a physical therapist who has provided over
+                10,000 successful balance and fall prevention treatments.
+              </p>
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                Following the strategies presented in The Fall Prevention Plan can have a profound
+                effect on the lives of all who read it. It can provide the knowledge, confidence,
+                safety and steadiness needed to live life to the fullest and it is my sincere hope that
+                it will help you too!
+              </p>
             </div>
           </div>
         </div>
@@ -107,30 +159,35 @@ export function Home() {
             </div>
             <div className="w-full lg:w-1/2 space-y-8">
               <div>
-                <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">The 10-Point Plan</h2>
+                <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+                  Creating a Personalized Fall Prevention Plan
+                </h2>
                 <p className="text-lg text-muted-foreground">
-                  Our core curriculum walks you through every aspect of fall prevention, from physical balance to home modifications.
+                  The core of the program walks you through the 10 most common areas related to falls
+                  and the best strategies known to prevent them.
                 </p>
               </div>
 
-              <ul className="space-y-4">
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
                 {[
-                  "Understanding Your Unique Fall Risk",
-                  "Improving Balance and Core Strength",
-                  "Home Safety Assessment & Modifications",
-                  "Managing Medications Safely",
-                  "Footwear and Mobility Aids"
+                  "Mindset",
+                  "Footwear",
+                  "Vision",
+                  "Medication",
+                  "Nutrition and Hydration",
+                  "Posture",
+                  "Home Safety",
+                  "Assistive Device Selection",
+                  "Strength",
+                  "Balance",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-4">
+                  <li key={i} className="flex items-start gap-3">
                     <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-bold text-primary">{i + 1}</span>
                     </div>
                     <span className="text-lg font-medium">{item}</span>
                   </li>
                 ))}
-                <li className="flex items-center gap-4 text-muted-foreground italic pl-10">
-                  + 5 more comprehensive modules
-                </li>
               </ul>
 
               <Link href="/about">
@@ -151,7 +208,7 @@ export function Home() {
               Ready to take the first step?
             </h2>
             <p className="text-xl text-primary-foreground/80 leading-relaxed">
-              Start with our free 5-minute Fall Risk Self-Assessment. You'll receive a personalized risk profile and actionable recommendations instantly.
+              Start with our free Fall Self-Assessment. We'll guide you through the Timed Up and Go test and a short risk-factor checklist, then give you a personalized risk profile and recommendations instantly.
             </p>
             <div className="pt-4">
               <Link href="/assessment">

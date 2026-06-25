@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Lock, PlayCircle, BookOpen, Clock } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import type { PlanSection } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { PlanSection } from "@workspace/api-client-react";
 
 export function ModulesList() {
   return (
@@ -110,11 +110,13 @@ function ModulesListContent() {
           </p>
         </div>
 
-        {renderSection("Introduction", "intro", "Start here to understand the core principles.")}
-        {renderSection("The 10-Point Plan", "ten_point", "The complete physical therapy protocol for avoiding falls.")}
-        {renderSection("The 5-Point Plan", "five_point", "What to do if a fall occurs — recovery and response.")}
-        {renderSection("Appendix A: Equipment", "appendix_a", "Recommended mobility aids and tools.")}
-        {renderSection("Appendix B: Home Safety", "appendix_b", "Room-by-room safety modifications.")}
+        {renderSection("Introduction", "intro", "Start here. What the Fall Prevention Plan is and how to get the most from it.")}
+        {renderSection("An Overview of Balance and Falls", "overview", "The basics: what a fall is, what balance is, and how your body creates it.")}
+        {renderSection("Fall Self-Assessment", "assessment", "What causes falls, and a simple test to estimate how likely you are to fall.")}
+        {renderSection("Creating a Personalized Fall Prevention Plan", "ten_point", "The 10 most common areas related to falls and the best strategies to address each.")}
+        {renderSection("What if a Fall Happens", "fall_response", "How to reduce injury, react after a fall, get up safely, and overcome the fear of falling.")}
+        {renderSection("Appendix A: Assistive Devices", "appendix_a", "Recommended canes, walkers, and wheelchairs, with ordering links.")}
+        {renderSection("Appendix B: Home Safety Modifications & Equipment", "appendix_b", "A room-by-room guide to equipment that makes the home safer, with ordering links.")}
       </div>
     </div>
   );

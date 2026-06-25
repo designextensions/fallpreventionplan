@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { format, isToday, isTomorrow, isThisWeek, differenceInCalendarDays } from "date-fns";
+import { getCompleted } from "@/lib/progress";
 import {
   useGetMe,
   useGetMyAssessment,
@@ -28,12 +29,23 @@ import {
   ClipboardList,
   Lock,
   Clock,
+  Search,
+  Phone,
+  LifeBuoy,
+  BookOpen,
 } from "lucide-react";
 
-function moduleImage(slug: string, w = 480, h = 320): string {
-  // picsum.photos returns a stable, deterministic stock photo per seed —
-  // perfect placeholder imagery for a prototype.
-  return `https://picsum.photos/seed/fpp-${slug}/${w}/${h}`;
+// Deterministic on-brand tile color per module (replaces random stock photos,
+// which looked arbitrary for medical content and called an external service).
+const TILE_COLORS = [
+  "from-[hsl(210_50%_30%)] to-[hsl(210_50%_42%)]",
+  "from-[hsl(120_25%_30%)] to-[hsl(120_25%_42%)]",
+  "from-[hsl(15_55%_40%)] to-[hsl(15_55%_52%)]",
+  "from-[hsl(280_30%_38%)] to-[hsl(280_30%_50%)]",
+  "from-[hsl(195_45%_32%)] to-[hsl(195_45%_44%)]",
+];
+function tileColor(order: number): string {
+  return TILE_COLORS[order % TILE_COLORS.length];
 }
 
 export function Dashboard() {
@@ -76,24 +88,70 @@ function DashboardContent() {
     query: { queryKey: getListLibraryItemsQueryKey() },
   });
 
+  // Module completion (persisted locally) — refresh when the user returns from
+  // a lesson where they pressed "Mark as Complete".
+  const [completed, setCompleted] = useState<Set<string>>(() => getCompleted());
+  useEffect(() => {
+    const refresh = () => setCompleted(getCompleted());
+    window.addEventListener("fpp:progress", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("fpp:progress", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
+  const [query, setQuery] = useState("");
+
   const isLoading =
     meLoading || assessmentLoading || sessionsLoading || modulesLoading || libraryLoading;
 
-  // Compute "where you are in the plan"
+  // Compute "where you are in the plan" using real completion data.
   const planStats = useMemo(() => {
     if (!modules) return null;
     const plan = modules
       .filter((m) => m.planSection === "ten_point")
       .sort((a, b) => a.order - b.order);
+    // The plan section contains an intro module plus the 10 numbered steps.
+    // Count/number only the 10 steps so it reads as a "10-point" plan.
+    const steps = plan.filter((m) => m.slug !== "personalized-plan-intro");
     const available = plan.filter((m) => !m.locked && !m.comingSoon);
-    const next = available[0] ?? plan[0] ?? null;
+    const firstIncomplete = available.find((m) => !completed.has(m.slug));
+    const next = firstIncomplete ?? available[0] ?? plan[0] ?? null;
+    const completedCount = steps.filter((m) => completed.has(m.slug)).length;
     return {
       plan,
-      totalInPlan: plan.length,
+      steps,
+      totalInPlan: steps.length,
       availableCount: available.length,
       nextModule: next,
+      completedCount,
       lockedCount: plan.length - available.length,
     };
+  }, [modules, completed]);
+
+  // Program search — Dr. Angell's "type 'I need a walker' and find it" feature.
+  const searchResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q || !modules) return [];
+    const stop = new Set(["the", "and", "for", "need", "want", "help", "with", "how", "what", "you", "your"]);
+    const tokens = q.split(/\s+/).filter((w) => w.length > 2 && !stop.has(w));
+    const terms = tokens.length ? tokens : [q];
+    return modules
+      .filter((m) => {
+        const hay = `${m.title} ${m.subtitle ?? ""}`.toLowerCase();
+        return terms.some((t) => hay.includes(t));
+      })
+      .sort((a, b) => a.order - b.order)
+      .slice(0, 8);
+  }, [query, modules]);
+
+  // "What if a Fall Happens" — Geoff asked for this to be reachable from the dashboard.
+  const fallResponseFirst = useMemo(() => {
+    const list = (modules ?? [])
+      .filter((m) => m.planSection === "fall_response")
+      .sort((a, b) => a.order - b.order);
+    return list[0] ?? null;
   }, [modules]);
 
   const nextSession = sessions && sessions.length > 0 ? sessions[0] : null;
@@ -121,7 +179,7 @@ function DashboardContent() {
             Welcome back, {firstName}.
           </h1>
           {assessment && (
-            <div className="mt-4 inline-flex items-center gap-2 text-base text-muted-foreground">
+            <div className="mt-4 inline-flex flex-wrap items-center gap-2 text-base text-muted-foreground">
               <CheckCircle2 className="w-5 h-5 text-primary" aria-hidden="true" />
               <span>
                 Risk profile: <span className="font-semibold text-foreground">{assessment.headline}</span>
@@ -132,7 +190,98 @@ function DashboardContent() {
               </Link>
             </div>
           )}
+
+          {/* Program search — type a plain question like "I need a walker" */}
+          <div className="mt-6 max-w-2xl">
+            <label htmlFor="program-search" className="sr-only">
+              Search the program
+            </label>
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" aria-hidden="true" />
+              <input
+                id="program-search"
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search the program — try “I need a walker”"
+                className="w-full min-h-[60px] pr-4 py-3 text-lg bg-card border-2 border-border rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                style={{ paddingLeft: "3.25rem" }}
+              />
+            </div>
+          </div>
         </header>
+
+        {/* Search results */}
+        {query.trim() !== "" && (
+          <section className="mb-10" aria-label="Search results">
+            {searchResults.length > 0 ? (
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {searchResults.map((m) => {
+                  const isLocked = m.locked || m.comingSoon;
+                  return (
+                    <li key={m.slug}>
+                      <Link
+                        href={isLocked ? "/pricing" : `/modules/${m.slug}`}
+                        className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="bg-primary/10 rounded-lg p-2 shrink-0">
+                          {isLocked ? (
+                            <Lock className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+                          ) : (
+                            <BookOpen className="w-5 h-5 text-primary" aria-hidden="true" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-serif text-lg font-bold leading-snug">{m.title}</p>
+                          {m.subtitle && (
+                            <p className="text-sm text-muted-foreground truncate">{m.subtitle}</p>
+                          )}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-lg text-muted-foreground bg-muted/40 rounded-xl p-5">
+                No matches for “{query}”. Try a single word like “walker”, “shoes”, “vision”, or “balance”.
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* Progress through the plan */}
+        {planStats && planStats.totalInPlan > 0 && (
+          <section className="mb-6" aria-label="Your progress through the plan">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-base font-semibold text-foreground">
+                Your progress through the plan
+              </span>
+              <span className="text-base font-bold text-primary">
+                {planStats.completedCount} of {planStats.totalInPlan} complete
+              </span>
+            </div>
+            <div
+              className="h-3 bg-muted rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label={`Plan progress: ${planStats.completedCount} of ${planStats.totalInPlan} steps complete`}
+              aria-valuenow={planStats.completedCount}
+              aria-valuemin={0}
+              aria-valuemax={planStats.totalInPlan}
+            >
+              <div
+                className="h-full bg-primary transition-all"
+                style={{
+                  width: `${
+                    planStats.totalInPlan
+                      ? (planStats.completedCount / planStats.totalInPlan) * 100
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </section>
+        )}
 
         {/* HERO: Your Next Step */}
         <section className="mb-10" aria-labelledby="next-step-heading">
@@ -158,7 +307,7 @@ function DashboardContent() {
                     {planStats?.nextModule?.subtitle ??
                       (assessment
                         ? "Continue at your own pace — every session is recorded."
-                        : "A few quick questions to set your baseline. Takes about 5 minutes.")}
+                        : "A short test and a few questions to set your baseline. Most people finish in under 10 minutes.")}
                   </p>
                   <div>
                     {planStats?.nextModule ? (
@@ -192,7 +341,7 @@ function DashboardContent() {
                 <div className="bg-primary/10 rounded-full p-2.5">
                   <Calendar className="w-6 h-6 text-primary" aria-hidden="true" />
                 </div>
-                <h3 className="font-serif text-2xl font-bold">Live Sessions</h3>
+                <h3 className="font-serif text-2xl font-bold">Classes</h3>
               </div>
               <p className="text-lg text-muted-foreground mb-5">
                 Join your therapist and other members.
@@ -237,7 +386,7 @@ function DashboardContent() {
               ) : (
                 <div className="mt-auto">
                   <p className="text-base text-muted-foreground mb-3 text-center">
-                    Live sessions are part of the Membership plan.
+                    Classes are part of the Membership plan.
                   </p>
                   <Link href="/pricing">
                     <Button
@@ -308,19 +457,22 @@ function DashboardContent() {
                 id="full-plan-heading"
                 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-1"
               >
-                The complete 10-Point Plan
+                Your Fall Prevention Plan
               </h2>
               <p className="text-lg text-muted-foreground">
-                All ten modules — take them in order, at your own pace.
+                Work through each step in order, at your own pace.
               </p>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {planStats.plan.map((mod) => {
                 const isLocked = mod.locked || mod.comingSoon;
+                const isDone = completed.has(mod.slug);
                 const isNext = !isLocked && mod.slug === planStats.nextModule?.slug;
                 const href = isLocked ? "/pricing" : `/modules/${mod.slug}`;
-                const shortTitle = mod.title.replace(/^Module \d+ — /, "");
+                const shortTitle = mod.title.replace(/^(Module \d+ — |Step \d+: )/, "");
+                const stepNum =
+                  mod.slug === "personalized-plan-intro" ? null : planStats.steps.indexOf(mod) + 1;
                 return (
                   <Link
                     key={mod.slug}
@@ -330,19 +482,20 @@ function DashboardContent() {
                     }`}
                     aria-label={`${mod.title}${isLocked ? " (locked)" : ""}`}
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                      <img
-                        src={moduleImage(mod.slug, 480, 360)}
-                        alt=""
-                        loading="lazy"
-                        className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                          isLocked ? "grayscale opacity-60" : ""
-                        }`}
-                      />
+                    <div
+                      className={`relative aspect-[4/3] overflow-hidden bg-gradient-to-br ${tileColor(
+                        mod.order,
+                      )} ${isLocked ? "opacity-50" : ""}`}
+                    >
                       <div className="absolute top-2 left-2 bg-white/95 rounded-full w-10 h-10 flex items-center justify-center font-serif font-bold text-primary text-lg shadow-sm">
-                        {mod.order}
+                        {stepNum ?? <BookOpen className="w-5 h-5" aria-hidden="true" />}
                       </div>
-                      {isNext && (
+                      {isDone && !isLocked && (
+                        <div className="absolute top-2 right-2 bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-sm inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-4 h-4" aria-hidden="true" /> Done
+                        </div>
+                      )}
+                      {isNext && !isDone && (
                         <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-sm">
                           Next
                         </div>
@@ -395,6 +548,60 @@ function DashboardContent() {
             </div>
           </section>
         )}
+
+        {/* More in your program */}
+        <section className="mb-4" aria-label="More in your program">
+          <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-1">More in your program</h2>
+          <p className="text-lg text-muted-foreground mb-6">Helpful sections beyond the 10-step plan.</p>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <Link
+              href={fallResponseFirst ? `/modules/${fallResponseFirst.slug}` : "/modules"}
+              className="flex items-start gap-4 rounded-xl border border-border bg-card p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="bg-primary/10 rounded-full p-3 shrink-0">
+                <LifeBuoy className="w-7 h-7 text-primary" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold mb-1">What if a Fall Happens</h3>
+                <p className="text-base text-muted-foreground">
+                  How to reduce injury, get up safely, and overcome the fear of falling.
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/modules"
+              className="flex items-start gap-4 rounded-xl border border-border bg-card p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="bg-primary/10 rounded-full p-3 shrink-0">
+                <BookOpen className="w-7 h-7 text-primary" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold mb-1">The full program</h3>
+                <p className="text-base text-muted-foreground">
+                  Every section: introduction, overview, the plan, and the appendices.
+                </p>
+              </div>
+            </Link>
+
+            {me?.tier === "concierge" && (
+              <Link
+                href="/concierge"
+                className="flex items-start gap-4 rounded-xl border-2 border-primary/40 bg-primary/5 p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="bg-primary/10 rounded-full p-3 shrink-0">
+                  <Phone className="w-7 h-7 text-primary" aria-hidden="true" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-xl font-bold mb-1">Your Concierge</h3>
+                  <p className="text-base text-muted-foreground">
+                    Your 1-on-1 notes, check-ins, and next outreach.
+                  </p>
+                </div>
+              </Link>
+            )}
+          </div>
+        </section>
 
       </div>
     </div>
