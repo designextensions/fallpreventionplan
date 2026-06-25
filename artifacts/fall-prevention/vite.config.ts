@@ -40,6 +40,14 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    // Local dev only: when API_PROXY_TARGET is set (running the dev server on
+    // your own machine, outside Replit), proxy /api to the local API server so
+    // the SPA's relative /api calls resolve. This is inert everywhere it isn't
+    // set: on Replit the application router composes /api, and production serves
+    // the frontend statically (this dev server isn't used at all).
+    ...(process.env.API_PROXY_TARGET
+      ? { proxy: { "/api": process.env.API_PROXY_TARGET } }
+      : {}),
     fs: {
       strict: true,
     },
