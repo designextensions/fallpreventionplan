@@ -10,6 +10,7 @@ export type PlanSection = typeof PlanSection[keyof typeof PlanSection];
 
 
 export const PlanSection = {
+  welcome: 'welcome',
   intro: 'intro',
   overview: 'overview',
   assessment: 'assessment',
@@ -17,4 +18,5 @@ export const PlanSection = {
   fall_response: 'fall_response',
   appendix_a: 'appendix_a',
   appendix_b: 'appendix_b',
+  summary: 'summary',
 } as const;

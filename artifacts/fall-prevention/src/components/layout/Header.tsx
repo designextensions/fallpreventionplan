@@ -13,6 +13,17 @@ import { Menu } from "lucide-react";
 import { useDemoAuth } from "@/lib/demoAuth";
 import { AccessibilityMenu } from "./AccessibilityMenu";
 
+const MEMBER_NAV = [
+  { href: "/welcome", label: "Welcome" },
+  { href: "/menu", label: "Main Menu" },
+  { href: "/chapters/1", label: "Getting Started" },
+  { href: "/chapters/2", label: "10 Point Plan" },
+  { href: "/chapters/3", label: "If a Fall Occurs" },
+  { href: "/chapters/4", label: "Appendixes" },
+  { href: "/chapters/6", label: "Summary" },
+  { href: "/sessions", label: "Resources" },
+];
+
 export function Header() {
   const { isSignedIn, signOut } = useDemoAuth();
   const { data: me } = useGetMe({ query: { enabled: isSignedIn, queryKey: getGetMeQueryKey() } });
@@ -33,13 +44,13 @@ export function Header() {
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
           <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Logo" className="w-10 h-10" />
-          <span className="font-serif font-bold text-xl text-primary tracking-tight hidden sm:inline-block">
+          <span className={`font-serif font-bold text-xl text-primary tracking-tight hidden sm:inline-block ${isSignedIn ? "lg:hidden 2xl:inline-block" : ""}`}>
             FallPreventionPlan
           </span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-3 xl:gap-6">
           {!isSignedIn && (
             <>
               <Link href="/about" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
@@ -56,25 +67,14 @@ export function Header() {
 
           {isSignedIn && (
             <>
-              <Link href="/dashboard" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/modules" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
-                The Plan
-              </Link>
-              <Link href="/sessions" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
-                Classes
-              </Link>
-              <Link href="/library" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
-                Library
-              </Link>
-              {me?.tier === 'concierge' && (
-                <Link href="/concierge" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
-                  Concierge
+              {/* Member nav in the order Dr. Angell laid out in his template */}
+              {MEMBER_NAV.map((item) => (
+                <Link key={item.href} href={item.href} className="text-foreground/80 hover:text-foreground font-medium transition-colors text-[15px] xl:text-base whitespace-nowrap">
+                  {item.label}
                 </Link>
-              )}
+              ))}
               {me?.tier === 'admin' && (
-                <Link href="/admin" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
+                <Link href="/admin" className="text-foreground/80 hover:text-foreground font-medium transition-colors text-base">
                   Admin
                 </Link>
               )}
@@ -99,7 +99,7 @@ export function Header() {
 
               {/* Mobile Menu Trigger for signed-out */}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild className="md:hidden">
+                <DropdownMenuTrigger asChild className="lg:hidden">
                   <Button variant="ghost" size="icon" className="min-h-[48px] min-w-[48px]">
                     <Menu className="h-6 w-6" />
                   </Button>
@@ -138,14 +138,17 @@ export function Header() {
                 <DropdownMenuSeparator />
 
                 {/* Mobile-only nav items */}
-                <div className="md:hidden">
-                  <DropdownMenuItem onClick={() => setLocation('/dashboard')} className="min-h-[48px] text-lg">Dashboard</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocation('/modules')} className="min-h-[48px] text-lg">The Plan</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocation('/sessions')} className="min-h-[48px] text-lg">Classes</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocation('/library')} className="min-h-[48px] text-lg">Library</DropdownMenuItem>
+                <div className="lg:hidden">
+                  {MEMBER_NAV.map((item) => (
+                    <DropdownMenuItem key={item.href} onClick={() => setLocation(item.href)} className="min-h-[48px] text-lg">{item.label}</DropdownMenuItem>
+                  ))}
                   <DropdownMenuSeparator />
                 </div>
-
+                <DropdownMenuItem onClick={() => setLocation('/dashboard')} className="min-h-[48px] text-lg">Dashboard</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocation('/library')} className="min-h-[48px] text-lg">Library</DropdownMenuItem>
+                {me?.tier === 'concierge' && (
+                  <DropdownMenuItem onClick={() => setLocation('/concierge')} className="min-h-[48px] text-lg">Concierge</DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => setLocation('/account')} className="min-h-[48px] text-lg">
                   Account & Billing
                 </DropdownMenuItem>

@@ -9,22 +9,13 @@ import { useParams, Link } from "wouter";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, Download, CheckCircle2, Lock, Film, Image as ImageIcon, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, CheckCircle2, Lock, Film, FileText } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
 import { isModuleComplete, setModuleComplete } from "@/lib/progress";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
-const SECTION_LABELS: Record<string, string> = {
-  intro: "Introduction",
-  overview: "Overview of Balance & Falls",
-  assessment: "Fall Self-Assessment",
-  ten_point: "Your Fall Prevention Plan",
-  fall_response: "If a Fall Happens",
-  appendix_a: "Appendix A — Assistive Devices",
-  appendix_b: "Appendix B — Home Safety",
-};
+import { SECTION_LABELS, chapterOf } from "@/lib/chapters";
+import { BlockRenderer } from "@/components/program/BlockRenderer";
 
 // Minimal Markdown -> HTML converter for the print/download handout. Handles the
 // constructs used in Dr. Angell's content: headings, GFM tables (medication form,
@@ -281,37 +272,16 @@ function ModuleShowContent() {
           </details>
         )}
 
-        {/* Content Body */}
-        <div className="prose prose-lg md:prose-xl prose-headings:font-serif prose-headings:text-primary max-w-none mb-16 prose-p:leading-relaxed prose-li:text-lg prose-li:leading-relaxed prose-strong:text-foreground prose-table:text-base">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              // Render inline images. When the source is empty/"placeholder",
-              // show a labeled image slot instead of a broken-image icon.
-              img: ({ src, alt }) => {
-                const realSrc = typeof src === "string" && /^https?:\/\//.test(src);
-                if (realSrc) {
-                  return (
-                    <img
-                      src={src as string}
-                      alt={alt ?? ""}
-                      className="rounded-xl border border-border shadow-sm mx-auto"
-                    />
-                  );
-                }
-                return (
-                  <span className="not-prose flex flex-col items-center justify-center text-center gap-2 my-6 rounded-xl border-2 border-dashed border-border bg-muted/30 px-6 py-10">
-                    <ImageIcon className="w-10 h-10 text-muted-foreground/60" />
-                    <span className="text-base font-medium text-muted-foreground">
-                      Image coming soon{alt ? `: ${alt}` : ""}
-                    </span>
-                  </span>
-                );
-              },
-            }}
-          >
-            {module.body || "Content coming soon."}
-          </ReactMarkdown>
+        {/* Content Body: same idea-block rendering as the chapter pages */}
+        <div className="mb-16">
+          <BlockRenderer body={module.body || "Content coming soon."} />
+          {chapterOf(module.planSection) && (
+            <p className="mt-8 text-lg">
+              <Link href={`/chapters/${chapterOf(module.planSection)!.n}#${module.slug}`} className="text-primary underline font-medium">
+                Read this section in Chapter {chapterOf(module.planSection)!.n}
+              </Link>
+            </p>
+          )}
         </div>
 
         {/* Key Points */}

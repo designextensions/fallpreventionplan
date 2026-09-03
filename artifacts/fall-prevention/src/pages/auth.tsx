@@ -26,7 +26,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
   // Send already-signed-in users to the right place: new members who have not
   // seen the intro slides go to onboarding; everyone else to the dashboard.
   useEffect(() => {
-    if (isSignedIn) setLocation(hasOnboarded() ? "/dashboard" : "/onboarding");
+    if (isSignedIn) setLocation(hasOnboarded() ? "/welcome" : "/onboarding");
   }, [isSignedIn, setLocation]);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -54,7 +54,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         name: finalName,
         tier: "subscription",
       });
-      setLocation(isSignUp || !hasOnboarded() ? "/onboarding" : "/dashboard");
+      setLocation(isSignUp || !hasOnboarded() ? "/onboarding" : "/welcome");
     }, 400);
   }
 

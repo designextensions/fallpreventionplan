@@ -123,7 +123,7 @@ export function Onboarding() {
         <div className="text-center mt-6">
           <button
             type="button"
-            onClick={() => finish("/dashboard")}
+            onClick={() => finish("/welcome")}
             className="text-base font-semibold text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-2 py-1"
           >
             Skip for now

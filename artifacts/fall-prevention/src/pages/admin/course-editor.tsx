@@ -28,13 +28,15 @@ import { ArrowLeft, Save, AlertCircle, CheckCircle2 } from "lucide-react";
 import { AdminShell } from "./AdminShell";
 
 type PlanSection =
+  | "welcome"
   | "intro"
   | "overview"
   | "assessment"
   | "ten_point"
   | "fall_response"
   | "appendix_a"
-  | "appendix_b";
+  | "appendix_b"
+  | "summary";
 
 interface FormState {
   slug: string;
@@ -298,6 +300,7 @@ function AdminCourseEditorContent() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="welcome">Welcome</SelectItem>
                     <SelectItem value="intro">Introduction</SelectItem>
                     <SelectItem value="overview">Overview of Balance and Falls</SelectItem>
                     <SelectItem value="assessment">Fall Self-Assessment</SelectItem>
@@ -305,6 +308,7 @@ function AdminCourseEditorContent() {
                     <SelectItem value="fall_response">What if a Fall Happens</SelectItem>
                     <SelectItem value="appendix_a">Appendix A — Assistive Devices</SelectItem>
                     <SelectItem value="appendix_b">Appendix B — Home Safety</SelectItem>
+                    <SelectItem value="summary">Summing It Up</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

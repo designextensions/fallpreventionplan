@@ -14,3 +14,6 @@ export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
+
+// Operators re-exported so workspace scripts can filter without a direct drizzle-orm dependency.
+export { eq, notInArray, asc, desc, sql } from "drizzle-orm";

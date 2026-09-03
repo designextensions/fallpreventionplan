@@ -419,7 +419,7 @@ components:
 
     PlanSection:
       type: string
-      enum: [intro, overview, assessment, ten_point, fall_response, appendix_a, appendix_b]
+      enum: [welcome, intro, overview, assessment, ten_point, fall_response, appendix_a, appendix_b, summary]
 
     ModuleSummary:
       type: object

@@ -24,6 +24,7 @@ import { Plus, Pencil, Trash2, Lock, Unlock, Clock, Eye } from "lucide-react";
 import { AdminShell } from "./AdminShell";
 
 const SECTION_LABELS: Record<string, string> = {
+  welcome: "Welcome",
   intro: "Introduction",
   overview: "Overview of Balance and Falls",
   assessment: "Fall Self-Assessment",
@@ -31,9 +32,11 @@ const SECTION_LABELS: Record<string, string> = {
   fall_response: "What if a Fall Happens",
   appendix_a: "Appendix A — Assistive Devices",
   appendix_b: "Appendix B — Home Safety",
+  summary: "Summing It Up",
 };
 
 const SECTION_ORDER = [
+  "welcome",
   "intro",
   "overview",
   "assessment",
@@ -41,6 +44,7 @@ const SECTION_ORDER = [
   "fall_response",
   "appendix_a",
   "appendix_b",
+  "summary",
 ] as const;
 
 export function AdminCourses() {

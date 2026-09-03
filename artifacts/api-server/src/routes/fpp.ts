@@ -142,13 +142,15 @@ router.get("/modules", async (req, res): Promise<void> => {
     subtitle: m.subtitle,
     order: m.order,
     planSection: m.planSection as
+      | "welcome"
       | "intro"
       | "overview"
       | "assessment"
       | "ten_point"
       | "fall_response"
       | "appendix_a"
-      | "appendix_b",
+      | "appendix_b"
+      | "summary",
     durationMin: m.durationMin,
     locked: !unlockedFor(me.tier, m.freeTier),
     comingSoon: m.comingSoon,

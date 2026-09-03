@@ -29,8 +29,8 @@ A subscription membership platform that turns physical therapist Dr. Geoff Angel
 - **API:** `artifacts/api-server` — routes in `src/routes/fpp.ts`; assessment questions + scoring in `src/lib/questions.ts`; demo auth/tier resolution in `src/lib/currentUser.ts`.
 - **DB schema (source of truth):** `lib/db/src/schema/` — `modules`, `assessments`, `sessions` (table `live_sessions`), `library` (`library_items`), `billing` (`invoices`), `concierge` (`concierge_notes`, `concierge_check_ins`), `users`.
 - **API contract (source of truth):** `lib/api-spec/openapi.yaml` (+ `orval.config.ts`). Generated outputs: `lib/api-client-react/src/generated` (hooks) and `lib/api-zod/src/generated` (Zod). DO NOT hand-edit generated files — edit the spec and run codegen.
-- **Seed data:** `scripts/src/seed.ts`.
-- **Content source of truth:** `../FPP-CONTENT-REFERENCE.md` (one level above repo root) — Geoff's verbatim program assembled from his Word docs. Use his exact clinical wording; do not paraphrase or invent clinical claims.
+- **Seed data:** `scripts/src/seed.ts` (reads `content/program.json`; see Content pipeline below).
+- **Content source of truth:** `../FPP WEBSITE TEMPLATE.docx` (Geoff, 2026-08-10), clean extraction at `../FPP-WEBSITE-TEMPLATE.md`, media inventory at `content/images.manifest.json`, implementation plan at `../CONTENT-V2-IMPLEMENTATION-PLAN.md`. It supersedes the May blueprint and `../FPP-CONTENT-REFERENCE.md` (June version, describes only what is seeded today). Use his exact wording; do not paraphrase or invent clinical claims.
 
 ### `modules` table columns
 `id, slug (unique), title, subtitle, order (int), planSection (text), durationMin (int?), videoEmbedUrl (text?), body (markdown text?), keyPoints (jsonb string[]), comingSoon (bool), freeTier (bool), printable (bool)`. No dedicated image column — images go inline in `body` markdown.
@@ -38,8 +38,21 @@ A subscription membership platform that turns physical therapist Dr. Geoff Angel
 ### `assessments` table columns
 `id, userId (int?), guestEmail (text?), guestName (text?), answers (jsonb), score (int), level (text: low|moderate|high), completedAt`.
 
-### `planSection` taxonomy
-Enum lives in `openapi.yaml` (type `PlanSection`). Currently `intro | ten_point | five_point | appendix_a | appendix_b`. Referenced in: `modules/index.tsx` (hardcoded `renderSection` calls), `admin/courses.tsx` (LABELS + SECTION_ORDER), `admin/course-editor.tsx` (PlanSection union + Select), `dashboard.tsx` (filters `ten_point`). Changing it requires: edit spec enum → codegen → update those 4 files.
+### `planSection` taxonomy and the chapter model (Aug 10 2026 content plan)
+Enum lives in `openapi.yaml` (type `PlanSection`): `welcome | intro | overview | assessment | ten_point | fall_response | appendix_a | appendix_b | summary`. Changing it requires: edit spec enum -> `pnpm --filter @workspace/api-spec run codegen` -> update `routes/fpp.ts` (cast in `GET /modules`), `admin/courses.tsx`, `admin/course-editor.tsx`.
+
+The program is presented as a **book**: `src/lib/chapters.ts` maps sections to six chapters (`intro|overview|assessment` -> Ch 1, `ten_point` -> Ch 2, `fall_response` -> Ch 3, `appendix_a` -> Ch 4, `appendix_b` -> Ch 5, `summary` -> Ch 6; `welcome` is its own page). No schema change: chapter membership is derived from `planSection`. A module whose `subtitle` starts with "Chapter" is that chapter's intro text, not a menu item.
+
+### Content pipeline (do not hand-edit module bodies)
+`../FPP WEBSITE TEMPLATE.docx` (Dr. Angell, source of truth) -> `../tools/extract-template.py` -> `../FPP-WEBSITE-TEMPLATE.md` + `content/images.manifest.json` -> `../tools/build-content.py` -> `content/program.json` -> `scripts/src/seed.ts` upserts modules and prunes slugs that no longer exist. Corrections from Geoff: edit the docx, re-run both tools, re-seed.
+
+Body markdown conventions (rendered by `src/components/program/BlockRenderer.tsx`):
+- `---` separates **idea blocks** (his underscore rules); blocks render as cards with alternating shade.
+- `![IMG-nn: description]()` image slot; real `src` once approved (`/images/program/...`), labeled placeholder until then.
+- `[video:V4 Label](url)` Vimeo slot (embed when url present); `[printout:Label](url)` and `[download:Label](url)` file buttons; `[Buy on Amazon](url)` affiliate button.
+- Everything else is GFM (bold lead sentences, lists, tables).
+
+Member pages: `/welcome` (his letter), `/menu` (Main Menu = book TOC + Resources), `/chapters/:n` (long-scroll chapter, sticky section jump list, per-section "Mark as Complete", footer "Return to Main Menu / Move on to Chapter n"). `/modules` redirects to `/menu`; `/modules/:slug` still works for deep links and admin. Sign-in and onboarding land on `/welcome`. Header member nav follows his template order.
 
 ## Senior-first UX & accessibility (built per Geoff's Blueprint meeting)
 

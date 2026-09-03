@@ -19,7 +19,6 @@ const Pricing = lazy(() => import("./pages/pricing").then((m) => ({ default: m.P
 const Contact = lazy(() => import("./pages/contact").then((m) => ({ default: m.Contact })));
 const Assessment = lazy(() => import("./pages/assessment").then((m) => ({ default: m.Assessment })));
 const Dashboard = lazy(() => import("./pages/dashboard").then((m) => ({ default: m.Dashboard })));
-const ModulesList = lazy(() => import("./pages/modules/index").then((m) => ({ default: m.ModulesList })));
 const ModuleShow = lazy(() => import("./pages/modules/show").then((m) => ({ default: m.ModuleShow })));
 const Sessions = lazy(() => import("./pages/sessions").then((m) => ({ default: m.Sessions })));
 const Library = lazy(() => import("./pages/library").then((m) => ({ default: m.Library })));
@@ -32,6 +31,9 @@ const AdminMembers = lazy(() => import("./pages/admin/members").then((m) => ({ d
 const AdminCourseEditor = lazy(() => import("./pages/admin/course-editor").then((m) => ({ default: m.AdminCourseEditor })));
 const AuthPage = lazy(() => import("./pages/auth").then((m) => ({ default: m.AuthPage })));
 const Onboarding = lazy(() => import("./pages/onboarding").then((m) => ({ default: m.Onboarding })));
+const Welcome = lazy(() => import("./pages/welcome").then((m) => ({ default: m.Welcome })));
+const MainMenu = lazy(() => import("./pages/menu").then((m) => ({ default: m.MainMenu })));
+const ChapterPage = lazy(() => import("./pages/chapter").then((m) => ({ default: m.ChapterPage })));
 const NotFound = lazy(() => import("./pages/not-found"));
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -46,7 +48,7 @@ function SignUpPage() {
 
 function HomeRedirect() {
   const { isSignedIn } = useDemoAuth();
-  return isSignedIn ? <Redirect to="/dashboard" /> : <Home />;
+  return isSignedIn ? <Redirect to="/menu" /> : <Home />;
 }
 
 function PageFallback() {
@@ -84,8 +86,12 @@ function AppRoutes() {
           <Route path="/assessment" component={Assessment} />
 
           {/* Protected Pages */}
+          <Route path="/welcome" component={Welcome} />
+          <Route path="/menu" component={MainMenu} />
+          <Route path="/chapters/:n" component={ChapterPage} />
           <Route path="/dashboard" component={Dashboard} />
-          <Route path="/modules" component={ModulesList} />
+          {/* The old per-module list is superseded by the Main Menu (Aug 10 content plan). */}
+          <Route path="/modules">{() => <Redirect to="/menu" />}</Route>
           <Route path="/modules/:slug" component={ModuleShow} />
           <Route path="/sessions" component={Sessions} />
           <Route path="/library" component={Library} />
