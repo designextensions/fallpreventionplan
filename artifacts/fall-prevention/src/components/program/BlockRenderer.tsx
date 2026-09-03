@@ -129,13 +129,31 @@ const components = {
 const PROSE =
   "prose prose-lg md:prose-xl max-w-none prose-headings:font-serif prose-headings:text-primary prose-p:leading-relaxed prose-li:text-lg prose-li:leading-relaxed prose-strong:text-foreground prose-table:text-base";
 
+const IMAGE_LINE = /^!\[[^\]]*\]\([^)]*\)\s*$/m;
+
+// A block with exactly one image and some text renders side by side; the image swaps
+// sides on each such block (his Aug 21 note: "the placement of the pictures and the main
+// idea statement alternate between the left and right").
+function splitImage(block: string): { image: string | null; text: string } {
+  const lines = block.split("\n");
+  const imgIdx = lines.findIndex((l) => IMAGE_LINE.test(l));
+  const imgCount = lines.filter((l) => IMAGE_LINE.test(l)).length;
+  if (imgIdx === -1 || imgCount !== 1) return { image: null, text: block };
+  const text = lines.filter((_, i) => i !== imgIdx).join("\n").trim();
+  if (text.length < 40) return { image: null, text: block }; // caption-only block: keep stacked
+  return { image: lines[imgIdx], text };
+}
+
 /** One idea per block, alternating shade so each new concept reads as new. */
 export function BlockRenderer({ body, startShade = 0 }: { body: string; startShade?: 0 | 1 }) {
   const blocks = body.split(BLOCK_SPLIT).map((b) => b.trim()).filter(Boolean);
+  let sideBySideCount = 0;
   return (
     <div className="flex flex-col gap-5">
       {blocks.map((block, i) => {
         const shaded = (i + startShade) % 2 === 1;
+        const { image, text } = splitImage(block);
+        const imageRight = image ? sideBySideCount++ % 2 === 1 : false;
         return (
           <section
             key={i}
@@ -143,11 +161,26 @@ export function BlockRenderer({ body, startShade = 0 }: { body: string; startSha
               shaded ? "bg-primary/[0.06] border-primary/15" : "bg-card border-card-border shadow-sm"
             }`}
           >
-            <div className={PROSE}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                {block}
-              </ReactMarkdown>
-            </div>
+            {image ? (
+              <div className="grid gap-6 md:grid-cols-5 md:items-center">
+                <div className={`md:col-span-2 ${imageRight ? "md:order-2" : ""}`}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                    {image}
+                  </ReactMarkdown>
+                </div>
+                <div className={`md:col-span-3 ${PROSE}`}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                    {text}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            ) : (
+              <div className={PROSE}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                  {block}
+                </ReactMarkdown>
+              </div>
+            )}
           </section>
         );
       })}
