@@ -71,7 +71,7 @@ The app is deployed via Replit's multi-artifact "application" router (`.replit` 
 - **API artifact** (`artifacts/api-server/.replit-artifact/artifact.toml`): builds with esbuild, runs `node dist/index.mjs` on port 8080, mounted at `/api`, health check `/api/healthz`.
 - The router composes them on one origin, so the SPA's relative `/api/...` calls work with no proxy or CORS in production. There is intentionally NO Express static-file serving — Replit serves the frontend.
 - `vite.config.ts` defaults `BASE_PATH` to `/` and `PORT` to a dev value so the production build never fails on a missing env var.
-- **Go-live needs:** set `DATABASE_URL` as a Replit secret (managed Postgres), then run `pnpm --filter @workspace/db run push` (schema) and `pnpm --filter @workspace/scripts run seed` (Geoff's content) once against the prod DB. `scripts/post-merge.sh` runs `db push` automatically when changes are merged into the workspace.
+- **Go-live needs:** set `DATABASE_URL` as a Replit secret (managed Postgres) and run `pnpm --filter @workspace/db run push` (schema) once against the prod DB. **Program content seeds itself on API boot** (`src/lib/programContent.ts` upserts `content/program.json` and prunes stale slugs; `SEED_ON_BOOT=0` disables), so a push + publish ships content. The deployment database is separate from the workspace database. `scripts/post-merge.sh` still runs `db push` + `seed:content` for the workspace on merge.
 
 ## Architecture decisions
 
