@@ -1,11 +1,12 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, BookOpen, Users } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, Image as ImageIcon } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/courses", label: "Courses", icon: BookOpen, exact: false },
   { href: "/admin/members", label: "Members", icon: Users, exact: false },
+  { href: "/admin/images", label: "Images", icon: ImageIcon, exact: false },
 ];
 
 function isActive(currentPath: string, href: string, exact: boolean): boolean {

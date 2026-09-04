@@ -28,6 +28,7 @@ const Concierge = lazy(() => import("./pages/concierge").then((m) => ({ default:
 const AdminOverview = lazy(() => import("./pages/admin/index").then((m) => ({ default: m.AdminOverview })));
 const AdminCourses = lazy(() => import("./pages/admin/courses").then((m) => ({ default: m.AdminCourses })));
 const AdminMembers = lazy(() => import("./pages/admin/members").then((m) => ({ default: m.AdminMembers })));
+const AdminImages = lazy(() => import("./pages/admin/images").then((m) => ({ default: m.AdminImages })));
 const AdminCourseEditor = lazy(() => import("./pages/admin/course-editor").then((m) => ({ default: m.AdminCourseEditor })));
 const AuthPage = lazy(() => import("./pages/auth").then((m) => ({ default: m.AuthPage })));
 const Onboarding = lazy(() => import("./pages/onboarding").then((m) => ({ default: m.Onboarding })));
@@ -101,6 +102,7 @@ function AppRoutes() {
           <Route path="/admin" component={AdminOverview} />
           <Route path="/admin/courses" component={AdminCourses} />
           <Route path="/admin/members" component={AdminMembers} />
+          <Route path="/admin/images" component={AdminImages} />
           <Route path="/admin/courses/new" component={AdminCourseEditor} />
           <Route path="/admin/courses/:slug" component={AdminCourseEditor} />
 
