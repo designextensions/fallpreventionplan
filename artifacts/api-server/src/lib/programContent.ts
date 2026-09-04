@@ -1,4 +1,4 @@
-import { db, modulesTable, notInArray } from "@workspace/db";
+import { db, modulesTable, notInArray, sql } from "@workspace/db";
 import { logger } from "./logger";
 // content/program.json is generated from Dr. Angell's "FPP WEBSITE TEMPLATE.docx" by
 // tools/extract-template.py + tools/build-content.py (see replit.md, "Content pipeline").
@@ -63,4 +63,17 @@ export async function ensureProgramContent(): Promise<void> {
     { modules: MODULES.length, removed: removed.map((r) => r.slug) },
     "Program content synced from content/program.json",
   );
+}
+
+/** The deployment database gets no migration step, so create small new tables on boot. */
+export async function ensureTables(): Promise<void> {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS image_decisions (
+      slot_id text PRIMARY KEY,
+      decision text NOT NULL,
+      file text,
+      notes text,
+      reviewer text,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`);
 }

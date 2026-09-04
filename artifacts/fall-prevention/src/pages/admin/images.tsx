@@ -5,6 +5,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { CheckCircle2, XCircle, Copy, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AdminShell } from "./AdminShell";
+import {
+  useListImageDecisions,
+  getListImageDecisionsQueryKey,
+  useUpsertImageDecision,
+} from "@workspace/api-client-react";
 
 // Contact sheet for Dr. Angell's in-person image review. Reads the published copy of
 // content/images.manifest.json, shows each slot's description and generated candidates,
@@ -41,6 +46,19 @@ export function AdminImages() {
 function AdminImagesContent() {
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [decisions, setDecisions] = useState<Record<string, Decision>>(loadDecisions);
+  // Server copy: what Dr. Angell decided from wherever he is. Merge it in on load; save every change.
+  const { data: remote } = useListImageDecisions({ query: { queryKey: getListImageDecisionsQueryKey() } });
+  const upsert = useUpsertImageDecision();
+  useEffect(() => {
+    if (!remote) return;
+    setDecisions((prev) => {
+      const merged = { ...prev };
+      for (const r of remote) merged[r.slotId] = { decision: r.decision, file: r.file ?? undefined, notes: r.notes ?? undefined };
+      return merged;
+    });
+  }, [remote]);
+  const save = (slotId: string, d: Decision) =>
+    upsert.mutate({ slotId, data: { decision: d.decision, file: d.file ?? null, notes: d.notes ?? null } });
   const [cursor, setCursor] = useState(0);        // which slot
   const [pick, setPick] = useState(0);            // which candidate within the slot
   const { toast } = useToast();
@@ -60,7 +78,9 @@ function AdminImagesContent() {
   const decide = (d: Decision["decision"]) => {
     if (!current) return;
     const file = current.candidates?.[pick];
-    setDecisions((prev) => ({ ...prev, [current.id]: { decision: d, file: d === "approve" ? file : undefined, notes: prev[current.id]?.notes } }));
+    const next: Decision = { decision: d, file: d === "approve" ? file : undefined, notes: decisions[current.id]?.notes };
+    setDecisions((prev) => ({ ...prev, [current.id]: next }));
+    save(current.id, next);
     setCursor((c) => Math.min(c + 1, (slots?.length ?? 1) - 1)); setPick(0);
   };
 
@@ -92,7 +112,7 @@ function AdminImagesContent() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="font-serif text-3xl font-bold text-primary">Image review</h1>
-            <p className="text-muted-foreground">Slot {cursor + 1} of {slots.length}. Keys: Y approve, N reject, 1/2 pick a candidate, arrows move. {stats.approved} approved, {stats.rejected} rejected.</p>
+            <p className="text-muted-foreground">Slot {cursor + 1} of {slots.length}. Keys: Y approve, N reject, 1/2 pick a candidate, arrows move. {stats.approved} approved, {stats.rejected} rejected. Decisions save automatically.</p>
           </div>
           <Button variant="outline" className="min-h-[48px] rounded-full" onClick={() => {
             navigator.clipboard.writeText(JSON.stringify(decisions, null, 2));
@@ -127,6 +147,7 @@ function AdminImagesContent() {
               placeholder="Notes for a regenerate (what to change)"
               value={mine?.notes ?? ""}
               onChange={(e) => setDecisions((prev) => ({ ...prev, [current.id]: { decision: prev[current.id]?.decision ?? "reject", file: prev[current.id]?.file, notes: e.target.value } }))}
+              onBlur={() => { const d = decisions[current.id]; if (d) save(current.id, d); }}
             />
 
             <div className="flex flex-wrap gap-3 mt-6">

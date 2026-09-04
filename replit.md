@@ -52,6 +52,9 @@ Body markdown conventions (rendered by `src/components/program/BlockRenderer.tsx
 - `[video:V4 Label](url)` Vimeo slot (embed when url present); `[printout:Label](url)` and `[download:Label](url)` file buttons; `[Buy on Amazon](url)` affiliate button.
 - Everything else is GFM (bold lead sentences, lists, tables).
 
+### Image review (Phase 4)
+`tools/generate-images.py` (run locally, OpenAI key outside the repo) writes candidates to `public/images/program/candidates/` and records them in `content/images.manifest.json`. `/admin/images` shows each slot with Dr. Angell's description and candidates; decisions save to the `image_decisions` table via `GET/PUT /api/admin/image-decisions` (table is created on API boot by `ensureTables()`, no migration needed) and also to `localStorage`. Pull them with `tools/apply-image-decisions.py https://fallprevention.businessbldrs.com`, then `tools/build-content.py` links approved files into section bodies; re-seed/publish to ship. Product slots are never generated.
+
 Member pages: `/welcome` (his letter), `/menu` (Main Menu = book TOC + Resources), `/chapters/:n` (long-scroll chapter, sticky section jump list, per-section "Mark as Complete", footer "Return to Main Menu / Move on to Chapter n"). `/modules` redirects to `/menu`; `/modules/:slug` still works for deep links and admin. Sign-in and onboarding land on `/welcome`. Header member nav follows his template order.
 
 ## Senior-first UX & accessibility (built per Geoff's Blueprint meeting)

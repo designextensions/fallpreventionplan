@@ -32,6 +32,8 @@ import type {
   ConciergeDashboard,
   DeleteAdminModule200,
   HealthStatus,
+  ImageDecision,
+  ImageDecisionInput,
   LibraryItem,
   LiveSession,
   Me,
@@ -1552,5 +1554,154 @@ export const useDeleteAdminModule = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteAdminModuleMutationOptions(options));
+    }
+
+export const getListImageDecisionsUrl = () => {
+
+
+
+
+  return `/api/admin/image-decisions`
+}
+
+/**
+ * @summary All image review decisions (admin review of generated candidates)
+ */
+export const listImageDecisions = async ( options?: RequestInit): Promise<ImageDecision[]> => {
+
+  return customFetch<ImageDecision[]>(getListImageDecisionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListImageDecisionsQueryKey = () => {
+    return [
+    `/api/admin/image-decisions`
+    ] as const;
+    }
+
+
+export const getListImageDecisionsQueryOptions = <TData = Awaited<ReturnType<typeof listImageDecisions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listImageDecisions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListImageDecisionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listImageDecisions>>> = ({ signal }) => listImageDecisions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listImageDecisions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListImageDecisionsQueryResult = NonNullable<Awaited<ReturnType<typeof listImageDecisions>>>
+export type ListImageDecisionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary All image review decisions (admin review of generated candidates)
+ */
+
+export function useListImageDecisions<TData = Awaited<ReturnType<typeof listImageDecisions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listImageDecisions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListImageDecisionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpsertImageDecisionUrl = (slotId: string,) => {
+
+
+
+
+  return `/api/admin/image-decisions/${slotId}`
+}
+
+/**
+ * @summary Record or update the decision for one image slot
+ */
+export const upsertImageDecision = async (slotId: string,
+    imageDecisionInput: ImageDecisionInput, options?: RequestInit): Promise<ImageDecision> => {
+
+  return customFetch<ImageDecision>(getUpsertImageDecisionUrl(slotId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      imageDecisionInput,)
+  }
+);}
+
+
+
+
+export const getUpsertImageDecisionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertImageDecision>>, TError,{slotId: string;data: BodyType<ImageDecisionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof upsertImageDecision>>, TError,{slotId: string;data: BodyType<ImageDecisionInput>}, TContext> => {
+
+const mutationKey = ['upsertImageDecision'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upsertImageDecision>>, {slotId: string;data: BodyType<ImageDecisionInput>}> = (props) => {
+          const {slotId,data} = props ?? {};
+
+          return  upsertImageDecision(slotId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpsertImageDecisionMutationResult = NonNullable<Awaited<ReturnType<typeof upsertImageDecision>>>
+    export type UpsertImageDecisionMutationBody = BodyType<ImageDecisionInput>
+    export type UpsertImageDecisionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Record or update the decision for one image slot
+ */
+export const useUpsertImageDecision = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertImageDecision>>, TError,{slotId: string;data: BodyType<ImageDecisionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof upsertImageDecision>>,
+        TError,
+        {slotId: string;data: BodyType<ImageDecisionInput>},
+        TContext
+      > => {
+      return useMutation(getUpsertImageDecisionMutationOptions(options));
     }
 

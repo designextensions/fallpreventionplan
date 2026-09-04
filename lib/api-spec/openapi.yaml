@@ -341,8 +341,70 @@ paths:
                 properties:
                   ok: { type: boolean }
 
+  /admin/image-decisions:
+    get:
+      operationId: listImageDecisions
+      tags: [admin]
+      summary: All image review decisions (admin review of generated candidates)
+      responses:
+        "200":
+          description: Decisions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ImageDecision"
+  /admin/image-decisions/{slotId}:
+    put:
+      operationId: upsertImageDecision
+      tags: [admin]
+      summary: Record or update the decision for one image slot
+      parameters:
+        - name: slotId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImageDecisionInput"
+      responses:
+        "200":
+          description: Saved decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageDecision"
+
 components:
   schemas:
+    ImageDecisionInput:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, reject]
+        file: { type: ["string", "null"] }
+        notes: { type: ["string", "null"] }
+        reviewer: { type: ["string", "null"] }
+
+    ImageDecision:
+      type: object
+      required: [slotId, decision, updatedAt]
+      properties:
+        slotId: { type: string }
+        decision:
+          type: string
+          enum: [approve, reject]
+        file: { type: ["string", "null"] }
+        notes: { type: ["string", "null"] }
+        reviewer: { type: ["string", "null"] }
+        updatedAt: { type: string, format: date-time }
+
     HealthStatus:
       type: object
       properties:

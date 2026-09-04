@@ -1,6 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { ensureProgramContent } from "./lib/programContent";
+import { ensureProgramContent, ensureTables } from "./lib/programContent";
 
 const rawPort = process.env["PORT"];
 
@@ -18,6 +18,7 @@ if (Number.isNaN(port) || port <= 0) {
 
 // Content sync must finish before we serve, so a fresh deployment never shows stale sections.
 try {
+  await ensureTables();
   await ensureProgramContent();
 } catch (err) {
   logger.error({ err }, "Program content sync failed; serving whatever the database holds");

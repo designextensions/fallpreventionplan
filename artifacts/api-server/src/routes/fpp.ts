@@ -5,6 +5,7 @@ import {
   usersTable,
   assessmentsTable,
   modulesTable,
+  imageDecisionsTable,
   liveSessionsTable,
   libraryItemsTable,
   invoicesTable,
@@ -39,6 +40,10 @@ import {
   UpdateAdminModuleResponse,
   DeleteAdminModuleParams,
   DeleteAdminModuleResponse,
+  ListImageDecisionsResponse,
+  UpsertImageDecisionParams,
+  UpsertImageDecisionBody,
+  UpsertImageDecisionResponse,
 } from "@workspace/api-zod";
 import { getCurrentUser, type Tier } from "../lib/currentUser";
 import { assessmentQuestions, scoreAssessment } from "../lib/questions";
@@ -588,6 +593,37 @@ router.delete("/admin/modules/:slug", async (req, res): Promise<void> => {
     return;
   }
   res.json(DeleteAdminModuleResponse.parse({ ok: true }));
+});
+
+
+// ---- Image review decisions (generated candidates reviewed at /admin/images) ----
+router.get("/admin/image-decisions", async (_req, res): Promise<void> => {
+  const rows = await db.select().from(imageDecisionsTable).orderBy(asc(imageDecisionsTable.slotId));
+  res.json(ListImageDecisionsResponse.parse(rows.map((r) => ({ ...r, updatedAt: r.updatedAt.toISOString() }))));
+});
+
+router.put("/admin/image-decisions/:slotId", async (req, res): Promise<void> => {
+  const params = UpsertImageDecisionParams.safeParse(req.params);
+  const body = UpsertImageDecisionBody.safeParse(req.body);
+  if (!params.success || !body.success) {
+    res.status(400).json({ error: !params.success ? params.error.message : body.error!.message });
+    return;
+  }
+  const me = await getCurrentUser(req);
+  const row = {
+    slotId: params.data.slotId,
+    decision: body.data.decision,
+    file: body.data.file ?? null,
+    notes: body.data.notes ?? null,
+    reviewer: body.data.reviewer ?? me.user?.email ?? null,
+    updatedAt: new Date(),
+  };
+  const [saved] = await db
+    .insert(imageDecisionsTable)
+    .values(row)
+    .onConflictDoUpdate({ target: imageDecisionsTable.slotId, set: row })
+    .returning();
+  res.json(UpsertImageDecisionResponse.parse({ ...saved, updatedAt: saved.updatedAt.toISOString() }));
 });
 
 export default router;

@@ -378,3 +378,41 @@ export const DeleteAdminModuleResponse = zod.object({
 })
 
 
+/**
+ * @summary All image review decisions (admin review of generated candidates)
+ */
+export const ListImageDecisionsResponseItem = zod.object({
+  "slotId": zod.string(),
+  "decision": zod.enum(['approve', 'reject']),
+  "file": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "reviewer": zod.string().nullish(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListImageDecisionsResponse = zod.array(ListImageDecisionsResponseItem)
+
+
+/**
+ * @summary Record or update the decision for one image slot
+ */
+export const UpsertImageDecisionParams = zod.object({
+  "slotId": zod.coerce.string()
+})
+
+export const UpsertImageDecisionBody = zod.object({
+  "decision": zod.enum(['approve', 'reject']),
+  "file": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "reviewer": zod.string().nullish()
+})
+
+export const UpsertImageDecisionResponse = zod.object({
+  "slotId": zod.string(),
+  "decision": zod.enum(['approve', 'reject']),
+  "file": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "reviewer": zod.string().nullish(),
+  "updatedAt": zod.coerce.date()
+})
+
+

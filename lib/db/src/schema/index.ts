@@ -5,3 +5,4 @@ export * from "./sessions";
 export * from "./library";
 export * from "./billing";
 export * from "./concierge";
+export * from "./imageDecisions";

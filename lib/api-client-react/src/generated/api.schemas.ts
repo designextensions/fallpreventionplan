@@ -5,6 +5,44 @@
  * Fall Prevention Plan API
  * OpenAPI spec version: 0.1.0
  */
+export type ImageDecisionInputDecision = typeof ImageDecisionInputDecision[keyof typeof ImageDecisionInputDecision];
+
+
+export const ImageDecisionInputDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface ImageDecisionInput {
+  decision: ImageDecisionInputDecision;
+  /** @nullable */
+  file?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  reviewer?: string | null;
+}
+
+export type ImageDecisionDecision = typeof ImageDecisionDecision[keyof typeof ImageDecisionDecision];
+
+
+export const ImageDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface ImageDecision {
+  slotId: string;
+  decision: ImageDecisionDecision;
+  /** @nullable */
+  file?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  reviewer?: string | null;
+  updatedAt: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
