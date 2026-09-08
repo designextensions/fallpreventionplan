@@ -27,6 +27,7 @@ type Slot = {
   candidates?: string[];
   status: string;
   notes?: string | null;
+  file?: string | null;   // the candidate currently placed on the site
 };
 type Decision = { decision: "approve" | "reject"; file?: string; notes?: string };
 const KEY = "fpp.imageDecisions";
@@ -125,7 +126,13 @@ function AdminImagesContent() {
         <Card className="border-border">
           <CardContent className="p-6 md:p-8">
             <p className="text-sm font-bold text-primary uppercase tracking-wider">{current.id} · {current.kind} · {current.page}{current.section ? ` · ${current.section}` : ""}</p>
-            <p className="text-xl mt-2 mb-6">“{current.geoffDescription}”</p>
+            <p className="text-xl mt-2 mb-2">“{current.geoffDescription}”</p>
+            <p className="text-sm text-muted-foreground mb-6">
+              {current.status === "placed" && "The first candidate is on the site now. Approve it to keep it, pick the other one and approve to swap, or reject to remove it and regenerate."}
+              {current.status === "approved" && "Approved."}
+              {current.status === "rejected" && "Rejected, waiting on a regenerate."}
+              {current.status === "generated" && "Not placed yet."}
+            </p>
 
             {current.candidates && current.candidates.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2">
@@ -133,7 +140,9 @@ function AdminImagesContent() {
                   <button key={c} type="button" onClick={() => setPick(i)}
                     className={`rounded-2xl overflow-hidden border-4 text-left ${pick === i ? "border-primary" : "border-transparent"} ${mine?.file === c ? "ring-4 ring-secondary" : ""}`}>
                     <img src={`${import.meta.env.BASE_URL}${c.replace(/^\//, "")}`} alt={`Candidate ${i + 1}`} className="w-full" />
-                    <span className="block px-3 py-2 text-sm text-muted-foreground">Candidate {i + 1}{mine?.file === c ? " · approved" : ""}</span>
+                    <span className="block px-3 py-2 text-sm text-muted-foreground">
+                      Candidate {i + 1}{current.file === c ? " · on the site now" : ""}{mine?.file === c ? " · approved" : ""}
+                    </span>
                   </button>
                 ))}
               </div>
